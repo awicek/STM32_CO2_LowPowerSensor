@@ -43,4 +43,36 @@
 - male rezistory a kondiky
 
 
-## kontrola 
+# hardware kontrola schematic
+- IIC
+    - speed = 100 | 400 (CO2 100-400, RTC. 100-400kHz), 10kOhm pull-ups
+  
+
+
+# Hardware to do list 
+ 1) microsd card connection vith spi
+ 2) how to desing the iic bus
+ 3) how to desing the power supply the low power ldo
+ 4) how to add external crystal for the RTC on the L0 
+ 5) how to choose parts that can be easily soldered by hand 
+
+# Software to do list 
+ 1) how to read and write to the sd card 
+
+
+
+
+
+
+# How does the co2 sensor work 
+
+## Good to know
+- **power-up time**  max 30 ms. Sensor is ready to accept commands after this time.
+- **Soft reset time** max 30 ms
+- **SCL ckock frequency** 0 - 400 kHz
+
+
+
+## I2C communication
+- **I2C address** 0x62 (7-bit)
+- **I2C speed** max 400 kHz
