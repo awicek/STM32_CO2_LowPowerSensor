@@ -60,7 +60,13 @@
  1) how to read and write to the sd card 
 
 
-
+# ToDo list for the project 
+  - [ ] check the input LDO
+  - [ ] check the CO2 sensor 
+  - [ ] check the RTC 
+  - [ ] check the crystal for the MCU
+  - [ ] check LDOs for powering up the MCU
+  - [ ] check the miscro-sd card socket
 
 
 
@@ -76,3 +82,14 @@
 ## I2C communication
 - **I2C address** 0x62 (7-bit)
 - **I2C speed** max 400 kHz
+
+
+
+# TODO what to buy
+  - [x] sd card reader 
+  - [x] calfuna 
+  - [ ] sd card  that 100% can be used with the spi
+  - [x] co2 sensor on the breakout board 
+  - [x] soldering paste
+  - [x] hotplate for soldering
+  - [ ] larger resistors 
