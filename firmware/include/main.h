@@ -41,7 +41,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+ 
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -55,10 +55,12 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
-
+   
 /* Private defines -----------------------------------------------------------*/
 #define VCP_TX_Pin GPIO_PIN_2
 #define VCP_TX_GPIO_Port GPIOA
+#define sd_EN_Pin GPIO_PIN_11
+#define sd_EN_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
@@ -68,9 +70,9 @@ void Error_Handler(void);
 #define LD3_Pin GPIO_PIN_3
 #define LD3_GPIO_Port GPIOB
 
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
+#define SD_SPI_HANDLE hspi1
+#define SD_CS_GPIO_Port GPIOA 
+#define SD_CS_Pin GPIO_PIN_11
 
 #ifdef __cplusplus
 }

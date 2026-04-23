@@ -23,10 +23,6 @@ find_package(CMSIS COMPONENTS STM32L0 REQUIRED)
 find_package(HAL COMPONENTS STM32L0 RCC PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH )
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
-include_directories(
-    include
-)
-
 add_executable(main
     src/main.cpp
 
@@ -34,18 +30,36 @@ add_executable(main
     src/usart.c
     src/i2c.c 
     src/syscalls.c 
+    src/spi.c
 
-    src/stm32l0xx_hal_msp.c
+    src/stm32l0xx_hal_msp.c   
     src/stm32l0xx_it.c
+    
+    fatfs/app/fatfs.c
+    
+    fatfs/core/diskio.c
+    fatfs/core/ff.c 
+    fatfs/core/ff_gen_drv.c
+    fatfs/core/option/syscall.c
+
+    fatfs/target/user_diskio.c
+    fatfs/target/user_diskio_spi.c
 )
 
-target_compile_options(main PRIVATE -fno-exceptions)
+target_include_directories(main PUBLIC
+    include
+    fatfs/app
+    fatfs/core
+    fatfs/target
+)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(main PRIVATE -Og -g3 -fdata-sections -ffunction-sections -fno-inline)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
   target_compile_options(main PRIVATE -O2)
 endif()
+
 # prints the memory usage at the end of the linking process 
 target_link_options(main PUBLIC -Wl,--print-memory-usage,--undefined=uxTopUsedPriority)
 
