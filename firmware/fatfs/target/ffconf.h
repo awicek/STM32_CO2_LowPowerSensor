@@ -24,7 +24,7 @@
 / Additional user header to be used
 /-----------------------------------------------------------------------------*/
 #include "main.h" 
-#include "stm32l0xx_hal.h"
+#include "stm32g4xx_hal.h"
 
 
 

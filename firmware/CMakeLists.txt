@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set path to the STM32Cube libraries and toolchain for compilation
 set(STM32_TOOLCHAIN_PATH /opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32)
-set(STM32_CUBE_L0_PATH /home/richard/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.4)
+set(STM32_CUBE_G4_PATH /home/richard/STM32Cube/Repository/STM32Cube_FW_G4_V1.6.2)
 set(STM32_TARGET_TRIPLET arm-none-eabi)
 
 # Path to the cmake used to find all the STM32Cube libraries 
@@ -19,8 +19,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Wall)
 add_definitions(-Wextra)
 
-find_package(CMSIS COMPONENTS STM32L0 REQUIRED)
-find_package(HAL COMPONENTS STM32L0 RCC PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH )
+find_package(CMSIS COMPONENTS STM32G4 REQUIRED)
+find_package(HAL COMPONENTS STM32G4 RCC PWR PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH)
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
 add_executable(main
@@ -32,18 +32,18 @@ add_executable(main
     src/syscalls.c 
     src/spi.c
 
-    src/stm32l0xx_hal_msp.c   
-    src/stm32l0xx_it.c
+    src/stm32g4xx_hal_msp.c   
+    src/stm32g4xx_it.c
     
-    fatfs/app/fatfs.c
+    # fatfs/app/fatfs.c
     
-    fatfs/core/diskio.c
-    fatfs/core/ff.c 
-    fatfs/core/ff_gen_drv.c
-    fatfs/core/option/syscall.c
+    # fatfs/core/diskio.c
+    # fatfs/core/ff.c 
+    # fatfs/core/ff_gen_drv.c
+    # fatfs/core/option/syscall.c
 
-    fatfs/target/user_diskio.c
-    fatfs/target/user_diskio_spi.c
+    # fatfs/target/user_diskio.c
+    # fatfs/target/user_diskio_spi.c
 )
 
 target_include_directories(main PUBLIC
@@ -64,21 +64,25 @@ endif()
 target_link_options(main PUBLIC -Wl,--print-memory-usage,--undefined=uxTopUsedPriority)
 
 target_link_libraries(main
-  HAL::STM32::L0::RCC
-  HAL::STM32::L0::RCCEx
-  HAL::STM32::L0::DMA
-  HAL::STM32::L0::GPIO
-  HAL::STM32::L0::CORTEX
-  HAL::STM32::L0::UART
-  HAL::STM32::L0::USART
-  HAL::STM32::L0::SPI
-  HAL::STM32::L0::TIM
-  HAL::STM32::L0::TIMEx
-  HAL::STM32::L0::I2C
-  HAL::STM32::L0::I2CEx
-  HAL::STM32::L0::FLASH
-  HAL::STM32::L0::FLASHEx
-  CMSIS::STM32::L031K6
+  HAL::STM32::G4::RCC
+  HAL::STM32::G4::RCCEx
+  HAL::STM32::G4::PWR
+  HAL::STM32::G4::PWREx
+  HAL::STM32::G4::DMA
+  HAL::STM32::G4::GPIO
+  HAL::STM32::G4::CORTEX
+  HAL::STM32::G4::UART
+  HAL::STM32::G4::UARTEx
+  HAL::STM32::G4::USART
+  HAL::STM32::G4::USARTEx
+  HAL::STM32::G4::SPI
+  HAL::STM32::G4::TIM
+  HAL::STM32::G4::TIMEx
+  HAL::STM32::G4::I2C
+  HAL::STM32::G4::I2CEx
+  HAL::STM32::G4::FLASH
+  HAL::STM32::G4::FLASHEx
+  CMSIS::STM32::G474RE
   STM32::NoSys
 )
 
