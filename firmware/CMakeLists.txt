@@ -35,15 +35,15 @@ add_executable(main
     src/stm32g4xx_hal_msp.c   
     src/stm32g4xx_it.c
     
-    # fatfs/app/fatfs.c
+    fatfs/app/fatfs.c
     
-    # fatfs/core/diskio.c
-    # fatfs/core/ff.c 
-    # fatfs/core/ff_gen_drv.c
-    # fatfs/core/option/syscall.c
+    fatfs/core/diskio.c
+    fatfs/core/ff.c 
+    fatfs/core/ff_gen_drv.c
+    fatfs/core/option/syscall.c
 
-    # fatfs/target/user_diskio.c
-    # fatfs/target/user_diskio_spi.c
+    fatfs/target/user_diskio.c
+    fatfs/target/user_diskio_spi.c
 )
 
 target_include_directories(main PUBLIC
