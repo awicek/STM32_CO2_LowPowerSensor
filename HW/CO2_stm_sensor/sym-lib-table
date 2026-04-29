@@ -7,4 +7,5 @@
   (lib (name "Risa_Rubas_lib0")(type "KiCad")(uri "${KIPRJMOD}/CO2_stm_sensor-backups/Risa_Rubas_lib0.kicad_sym")(options "")(descr ""))
   (lib (name "New_Library_0")(type "KiCad")(uri "${KIPRJMOD}/CO2_stm_sensor-backups/New_Library_0.kicad_sym")(options "")(descr ""))
   (lib (name "10118192-0002LF")(type "KiCad")(uri "/home/richard/Documents/Kicad_Parts/micro_usb/10118192-0002LF.kicad_sym")(options "")(descr ""))
+  (lib (name "JLC")(type "KiCad")(uri "${KIPRJMOD}/JLC2KiCad_lib/symbol/TYPE-C_6P(073).kicad_sym")(options "")(descr ""))
 )
