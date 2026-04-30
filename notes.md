@@ -96,5 +96,37 @@
 
 
 # Parts to  order
+  - [o] usb-c connector 
+  - [o] esd proteciton 
+  - [x] low poer ldo 
+  - [o] baterry protection
+  - [o] battery holder 
+  - [o] high power ldo
+  - [o] crystal
+  - [o] crystal condensators
+  - [o] buttons
+  - [o] mcu
+  - [ ] led
+  - [o] jst connectors 1x4
+  - [o] jst connectors 1x6
+  - [x] co2 sensors
+  - [o] sdcard slots
+  - [o] rtc
+  - [o] high switch low
+  - [o] pinheader 
 
-  - [ ] usb-c connector 
+## resistors
+  - [o] 4.7 k
+  - [o] 20 k
+  - [o] 30 k
+  - [o] 10 k
+  - [o] 47 k
+  - [o] 470 
+
+## capacitors
+  - [o] 1u 
+  - [o] 2.2u
+  - [o] 100n 
+  - [o] 22 u 
+  - [o] 10 u 
+  - [o] 200 p
