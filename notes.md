@@ -93,3 +93,8 @@
   - [x] soldering paste
   - [x] hotplate for soldering
   - [ ] larger resistors 
+
+
+# Parts to  order
+
+  - [ ] usb-c connector 

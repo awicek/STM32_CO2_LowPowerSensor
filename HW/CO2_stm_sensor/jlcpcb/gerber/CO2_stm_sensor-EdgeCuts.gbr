@@ -1,0 +1,23 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,9.0.7-9.0.7~ubuntu24.04.1*%
+%TF.CreationDate,2026-04-30T22:02:22+02:00*%
+%TF.ProjectId,CO2_stm_sensor,434f325f-7374-46d5-9f73-656e736f722e,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 9.0.7-9.0.7~ubuntu24.04.1) date 2026-04-30 22:02:22*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.120000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X95000000Y-45000000D02*
+X130000000Y-45000000D01*
+X130000000Y-137000000D01*
+X95000000Y-137000000D01*
+X95000000Y-45000000D01*
+M02*
