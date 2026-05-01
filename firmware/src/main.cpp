@@ -14,6 +14,7 @@
 #include <stm32g4xx_hal_def.h>
 #include <stm32g4xx_hal_i2c.h>
 #include <stm32g4xx_hal_uart.h>
+#include <sys/cdefs.h>
 
 #include "fatfs.h"
 
@@ -21,19 +22,43 @@
 void SystemClock_Config(void);
 void myprintf(const char *fmt, ...);
 
+// int __io_putchar(int ch)
+// {
+//     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+//     return ch;
+// }
+
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+extern "C" int _write(int file, char *ptr, int len)
+{
+
+    HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+    return len;
+};
+
+PUTCHAR_PROTOTYPE
+{
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+}
 
 int main(void)
 { 
     HAL_Init();
     SystemClock_Config();
-
     MX_GPIO_Init();
     MX_USART2_UART_Init();
+    setbuf(stdout, NULL);
+    printf("ahoj%d%d  %f \r\n", 1, 2, 0.444); 
     MX_I2C1_Init();
     MX_SPI2_Init();
 
     HAL_Delay(1000);
-    MX_USART2_UART_Init();
     
     MX_FATFS_Init();
 

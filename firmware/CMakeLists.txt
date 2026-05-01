@@ -23,7 +23,9 @@ find_package(CMSIS COMPONENTS STM32G4 REQUIRED)
 find_package(HAL COMPONENTS STM32G4 RCC PWR PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH)
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
-add_executable(main
+set(PROJECT_NAME main)
+
+add_executable(${PROJECT_NAME}
     src/main.cpp
 
     src/gpio.c
@@ -37,13 +39,18 @@ add_executable(main
     
     fatfs/app/fatfs.c
     
-    fatfs/core/diskio.c
+    fatfs/core/diskio.c 
     fatfs/core/ff.c 
     fatfs/core/ff_gen_drv.c
     fatfs/core/option/syscall.c
 
     fatfs/target/user_diskio.c
     fatfs/target/user_diskio_spi.c
+)
+
+target_link_options(${PROJECT_NAME} PRIVATE
+    -specs=nano.specs
+    -u _printf_float
 )
 
 target_include_directories(main PUBLIC
