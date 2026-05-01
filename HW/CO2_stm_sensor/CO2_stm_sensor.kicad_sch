@@ -7058,10 +7058,6 @@
 		(uuid "634e5f3b-1ccb-43cb-a59f-17deb570708b")
 	)
 	(no_connect
-		(at 90.17 45.72)
-		(uuid "63e407a0-7d29-4919-a146-7cec49a75d87")
-	)
-	(no_connect
 		(at 224.79 111.76)
 		(uuid "6ad5e607-0e50-4630-aadd-6c1b6c14290a")
 	)
@@ -7794,6 +7790,16 @@
 			(type default)
 		)
 		(uuid "438adfac-1277-4340-b27f-a533e1dcf7bc")
+	)
+	(wire
+		(pts
+			(xy 90.17 45.72) (xy 95.25 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "444de693-d229-4b64-b0a4-692216e420b6")
 	)
 	(wire
 		(pts
@@ -14555,6 +14561,82 @@
 			(project ""
 				(path "/fbf6196a-da46-4b73-a741-a9cbb7111e74"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 95.25 45.72 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9f5e94c0-4459-48f6-b056-c31e70446dc9")
+		(property "Reference" "#PWR043"
+			(at 101.6 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 99.06 45.7199 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 95.25 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 95.25 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 95.25 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part #" ""
+			(at 95.25 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "50e85d1a-5a9d-4aa0-a51c-860e662dad3f")
+		)
+		(instances
+			(project "CO2_stm_sensor"
+				(path "/fbf6196a-da46-4b73-a741-a9cbb7111e74"
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
