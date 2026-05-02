@@ -17,7 +17,7 @@
 #include <sys/cdefs.h>
 
 #include "fatfs.h"
-
+#include "stm32g4xx.h"
 
 void SystemClock_Config(void);
 void myprintf(const char *fmt, ...);
@@ -187,7 +187,6 @@ void SystemClock_Config(void)
         Error_Handler();
     }
 }
-
 
 void Error_Handler(void)
 {
