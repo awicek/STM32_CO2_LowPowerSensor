@@ -239,7 +239,7 @@ typedef struct
 
 typedef struct
 {
-  __IO uint32_t CSR;          /*!< ADC common status register,            Address offset: 0x300 + 0x00 */
+  __IO uint32_t CSR;         /*!< ADC common status register,            Address offset: 0x300 + 0x00 */
   uint32_t      RESERVED1;    /*!< Reserved,                              Address offset: 0x300 + 0x04 */
   __IO uint32_t CCR;          /*!< ADC common configuration register,     Address offset: 0x300 + 0x08 */
   __IO uint32_t CDR;          /*!< ADC common group regular data register Address offset: 0x300 + 0x0C */

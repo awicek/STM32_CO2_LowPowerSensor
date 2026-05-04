@@ -1,3 +1,5 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(HAL_DRIVERS_F0
     adc can cec comp cortex crc dac dma exti flash gpio i2c i2s irda iwdg pcd 
     pwr rcc rtc smartcard smbus spi tim tsc uart usart wwdg

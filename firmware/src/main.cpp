@@ -19,33 +19,17 @@
 #include "fatfs.h"
 #include "stm32g4xx.h"
 
+
+#include "g4_gpio.h"
 void SystemClock_Config(void);
-void myprintf(const char *fmt, ...);
 
-// int __io_putchar(int ch)
-// {
-//     HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-//     return ch;
-// }
-
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif
 
 extern "C" int _write(int file, char *ptr, int len)
 {
-
     HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, HAL_MAX_DELAY);
     return len;
 };
 
-PUTCHAR_PROTOTYPE
-{
-    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-    return ch;
-}
 
 int main(void)
 { 
@@ -53,16 +37,46 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART2_UART_Init();
+
     setbuf(stdout, NULL);
+    gpio_init_t settings = {
+        .pins = GPIO_pin_2 | GPIO_pin_3,
+        .mode = GPIO_mode_output,
+        .pull = GPIO_pupd_pullup,
+        .speed = GPIO_speed_low,
+        .alternate = 0 
+    };
+
+    gpio_init(GPIOC, &settings);
+    HAL_Delay(100);
+    
+    for (int i = 0; i < 10; i++)
+    {
+        gpio_set(GPIOC, GPIO_pin_2 | GPIO_pin_3);
+        HAL_Delay(100);
+        gpio_reset(GPIOC, GPIO_pin_2 | GPIO_pin_3 );
+        HAL_Delay(100);
+    }     
+
+    int c3 = gpio_read(GPIOC, GPIO_pin_3);
+    int c2 = gpio_read(GPIOC, GPIO_pin_2);
+    printf("c2 %d c3 %d \r\n", c2, c3);
+    
+    while(1){};
     printf("ahoj%d%d  %f \r\n", 1, 2, 0.444); 
     MX_I2C1_Init();
     MX_SPI2_Init();
-
+    uint32_t a = 0b100000000;
+    printf("a %d \r\n", a);
+    uint32_t b = __CLZ(__RBIT(a));
+    printf("a %d \r\n", a);
+    printf("a %d  b %d /n/r", a, b);
+    HAL_Delay(__CLZ(__RBIT(a)));
     HAL_Delay(1000);
     
     MX_FATFS_Init();
 
-    myprintf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
+    printf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
 
     HAL_Delay(1000); //a short delay is important to let the SD card settle
 
@@ -73,7 +87,7 @@ int main(void)
     //Open the file system
     while ((fres = f_mount(&FatFs, "", 1)) != FR_OK)
     {
-        myprintf("f_mount error (%i)\r\n", fres);
+        printf("f_mount error (%i)\r\n", fres);
         HAL_Delay(1000);
     }
 
@@ -84,7 +98,7 @@ int main(void)
 
     fres = f_getfree("", &free_clusters, &getFreeFs);
     if (fres != FR_OK) {
-        myprintf("f_getfree error (%i)\r\n", fres);
+        printf("f_getfree error (%i)\r\n", fres);
         while(1);
     }
 
@@ -92,14 +106,14 @@ int main(void)
     total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
     free_sectors = free_clusters * getFreeFs->csize;
 
-    myprintf("SD card stats:\r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
+    printf("SD card stats:\r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
 
     //Now let's try to open file "test.txt"
     fres = f_open(&fil, "test.txt", FA_READ);
     if (fres != FR_OK) {
-        myprintf("f_open error (%i)\r\n", fres);
+        printf("f_open error (%i)\r\n", fres);
     }
-    myprintf("I was able to open 'test.txt' for reading!\r\n");
+    printf("I was able to open 'test.txt' for reading!\r\n");
 
     //Read 30 bytes from "test.txt" on the SD card
     BYTE readBuf[30];
@@ -108,9 +122,9 @@ int main(void)
     //f_gets is a wrapper on f_read that does some string formatting for us
     TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
     if(rres != 0) {
-        myprintf("Read string from 'test.txt' contents: %s\r\n", readBuf);
+        printf("Read string from 'test.txt' contents: %s\r\n", readBuf);
     } else {
-        myprintf("f_gets error (%i)\r\n", fres);
+        printf("f_gets error (%i)\r\n", fres);
     }
 
     //Be a tidy kiwi - don't forget to close your file!
@@ -119,9 +133,9 @@ int main(void)
     //Now let's try and write a file "write.txt"
     fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
     if(fres == FR_OK) {
-        myprintf("I was able to open 'write.txt' for writing\r\n");
+        printf("I was able to open 'write.txt' for writing\r\n");
     } else {
-        myprintf("f_open error (%i)\r\n", fres);
+        printf("f_open error (%i)\r\n", fres);
     }
 
     //Copy in a string
@@ -129,9 +143,9 @@ int main(void)
     UINT bytesWrote;
     fres = f_write(&fil, readBuf, 19, &bytesWrote);
     if(fres == FR_OK) {
-        myprintf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
+        printf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
     } else {
-        myprintf("f_write error (%i)\r\n", fres);
+        printf("f_write error (%i)\r\n", fres);
     }
 
     //Be a tidy kiwi - don't forget to close your file!
@@ -194,16 +208,4 @@ void Error_Handler(void)
     while (1)
     {
     }
-}
-
-void myprintf(const char *fmt, ...) {
-  static char buffer[256];
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, args);
-  va_end(args);
-
-  int len = strlen(buffer);
-  HAL_UART_Transmit(&huart2, (uint8_t*)buffer, len, -1);
-
 }

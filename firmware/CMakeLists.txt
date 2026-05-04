@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set path to the STM32Cube libraries and toolchain for compilation
 set(STM32_TOOLCHAIN_PATH /opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32)
-set(STM32_CUBE_G4_PATH /home/richard/STM32Cube/Repository/STM32Cube_FW_G4_V1.6.2)
+set(STM32_CUBE_G4_PATH ${CMAKE_CURRENT_SOURCE_DIR}/STM32Cube_FW_G4_V1.6.2)
 set(STM32_TARGET_TRIPLET arm-none-eabi)
 
 # Path to the cmake used to find all the STM32Cube libraries 
