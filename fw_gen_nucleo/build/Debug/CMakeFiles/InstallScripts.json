@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/cmake_install.cmake",
+		"/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/cmake/stm32cubemx/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

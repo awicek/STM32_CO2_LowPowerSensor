@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set path to the STM32Cube libraries and toolchain for compilation
 set(STM32_TOOLCHAIN_PATH /opt/st/stm32cubeclt_1.18.0/GNU-tools-for-STM32)
-set(STM32_CUBE_G4_PATH /home/richard/STM32Cube/Repository/STM32Cube_FW_G4_V1.6.2)
+set(STM32_CUBE_G4_PATH ${CMAKE_CURRENT_SOURCE_DIR}/STM32Cube_FW_G4_V1.6.2)
 set(STM32_TARGET_TRIPLET arm-none-eabi)
 
 # Path to the cmake used to find all the STM32Cube libraries 
@@ -21,6 +21,7 @@ add_definitions(-Wextra)
 
 find_package(CMSIS COMPONENTS STM32G4 REQUIRED)
 find_package(HAL COMPONENTS STM32G4 RCC PWR PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH)
+find_package(LL COMPONENTS STM32G4 RCC PWR GPIO DMA CORTEX SI2C )
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
 add_executable(main
@@ -32,7 +33,6 @@ add_executable(main
     src/syscalls.c 
     src/spi.c
 
-    src/stm32g4xx_hal_msp.c   
     src/stm32g4xx_it.c
     
     # fatfs/app/fatfs.c
@@ -65,11 +65,15 @@ target_link_options(main PUBLIC -Wl,--print-memory-usage,--undefined=uxTopUsedPr
 
 target_link_libraries(main
   HAL::STM32::G4::RCC
+  LL::STM32::G4::RCC
   HAL::STM32::G4::RCCEx
   HAL::STM32::G4::PWR
+  LL::STM32::G4::PWR
   HAL::STM32::G4::PWREx
   HAL::STM32::G4::DMA
+  LL::STM32::G4::DMA
   HAL::STM32::G4::GPIO
+  LL::STM32::G4::GPIO
   HAL::STM32::G4::CORTEX
   HAL::STM32::G4::UART
   HAL::STM32::G4::UARTEx

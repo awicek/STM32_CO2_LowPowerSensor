@@ -1,0 +1,6 @@
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/CMakeFiles/fw_gen_nucleo.dir
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/CMakeFiles/edit_cache.dir
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/CMakeFiles/rebuild_cache.dir
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/cmake/stm32cubemx/CMakeFiles/edit_cache.dir
+/home/richard/Documents/Projects/CO2_sensor/STM32_CO2_LowPowerSensor/fw_gen_nucleo/build/Debug/cmake/stm32cubemx/CMakeFiles/rebuild_cache.dir
