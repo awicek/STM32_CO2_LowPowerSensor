@@ -1,10 +1,12 @@
 #include "main.h"
+#include "g4_iic.h"
 #include "gpio.h"
 #include "i2c.h"
 #include "usart.h"
 #include "spi.h"
 
-
+#include "g4_iic.h"
+#include "g4_gpio.h"
 #include "stm32g4xx_hal.h"
 
 #include <cstdint>
@@ -14,10 +16,15 @@
 #include <stm32g4xx_hal_flash_ex.h>
 
 #include <stm32g4xx_hal_def.h>
-#include <stm32g4xx_hal_i2c.h>
+#include <stm32g4xx_hal_i2c.h> 
 #include <stm32g4xx_hal_uart.h>
 
 void SystemClock_Config(void);
+extern "C" int _write(int file, char *ptr, int len)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+    return len;
+};
 
 typedef struct __attribute__((packed)) 
 {
@@ -81,12 +88,18 @@ public:
 int main(void)
 {
     HAL_Init();
-    char char_buff[50];
     SystemClock_Config();
 
     MX_GPIO_Init();
     MX_USART2_UART_Init();
     MX_I2C1_Init();
+    iic_preinit(); 
+    iic_init_t iic2_setting = {0x10D19CE4}; 
+    iic_init(I2C2, &iic2_setting);
+    iic_transmit(I2C2, 0x62, (uint8_t*)SCD40::GET_SERIAL_NUMBER,  2U);
+    
+
+    while(1){};
 
     uint8_t buffer[20];
     HAL_Delay(1000);
@@ -155,7 +168,7 @@ int main(void)
 
         char out[64];
 
-        sprintf(out, "CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\r\n",
+        printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\r\n",
                 co2, temperature, humidity);
 
 

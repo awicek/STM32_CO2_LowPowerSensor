@@ -11,3 +11,4 @@ arm-none-eabi-objcopy -O binary $BUILD_PATH/main.elf $BUILD_PATH/main.bin
 
 # flash the firmware
 st-flash write $BUILD_PATH/main.bin 0x08000000
+st-flash reset 
