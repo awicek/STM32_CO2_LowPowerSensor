@@ -103,7 +103,7 @@ int iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size)
 
 int iic_receive(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size)
 {
-
+    
 
     return 0;
 }
