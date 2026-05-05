@@ -68,6 +68,26 @@ typedef struct
 #define GPIO_pin_15              ((uint16_t)0x8000)
 #define GPIO_pin_mask            ((uint32_t)0xFFFF)  /* Mask for all the pins */
 
+/* GPIO Aternate Functions */
+#define GPIO_af_mask             0xFU
+#define GPIO_af_0                0x0
+#define GPIO_af_1                0x1
+#define GPIO_af_2                0x2
+#define GPIO_af_3                0x3
+#define GPIO_af_4                0x4
+#define GPIO_af_5                0x5
+#define GPIO_af_6                0x6
+#define GPIO_af_7                0x7
+#define GPIO_af_8                0x8
+#define GPIO_af_9                0x9
+#define GPIO_af_10               0xA
+#define GPIO_af_11               0xB
+#define GPIO_af_12               0xC
+#define GPIO_af_13               0xD
+#define GPIO_af_14               0xE
+#define GPIO_af_15               0xF
+
+
 /**
  *  Initialize gpio pins.
  *  @param port GPIO port (GPIOA, GPIOB, GPIOC, GPIOD)
@@ -99,76 +119,6 @@ void gpio_reset(GPIO_TypeDef *port, uint16_t pin);
 void gpio_toogle(GPIO_TypeDef *port, uint16_t pin);
 
 
-
-void gpio_init(GPIO_TypeDef *port, gpio_init_t *settings)
-{
-    uint32_t temp;
-    uint32_t position; 
-
-    /* Asserts */
-    settings->pins &= GPIO_pin_mask;
-
-    while ((settings->pins) != 0U)
-    {
-        position = get_pin_pos(settings->pins);
-        settings->pins &= ~(1U << position);
-        
-        /* 1. Set gpio mode  */
-        temp = port->MODER;
-        temp &= ~(GPIO_mode_mask << (position * 2U));   
-        temp |= ((settings->mode & GPIO_mode_mask) << (position * 2U));
-        port->MODER = temp;
-
-        /* 2. Set output type and speed */
-        if ((settings->mode & GPIO_mode_mask) == GPIO_mode_input || 
-            (settings->mode & GPIO_mode_mask) == GPIO_mode_alternate)
-        {
-            temp = port->OTYPER;
-            temp &= ~(GPIO_otype_mask << position);
-            temp |= (((settings->output_type) & GPIO_otype_mask) << position);
-            port->OTYPER = temp;
-
-            temp = port->OSPEEDR;
-            temp &= ~(GPIO_speed_mask << (position * 2U));
-            temp |= (((settings->speed) & GPIO_speed_mask) << (position * 2U));
-            port->OSPEEDR = temp; 
-        }
-
-        /* 3. Set pull-up or pull-down */
-        temp = port->PUPDR;
-        temp &= ~(GPIO_pupd_mask << (position * 2U));
-        temp |= (((settings->pull) & GPIO_pupd_mask) << (position * 2U));
-        port->PUPDR = temp;
-    }
-}
-
-
-int gpio_read(GPIO_TypeDef *port, uint16_t pin)
-{
-    return ((port->IDR & pin) != 0U);
-}
-
-void gpio_set(GPIO_TypeDef *port, uint16_t pin)
-{
-    port->BSRR = (uint32_t)pin;
-}
-
-void gpio_reset(GPIO_TypeDef *port, uint16_t pin)
-{
-    port->BRR = (uint32_t)pin;
-}
-
-void gpio_toogle(GPIO_TypeDef *port, uint16_t pin)
-{
-    if (gpio_read(port, pin))
-    {
-        port->BRR = (uint32_t)pin;
-    }
-    else
-    {
-        port->BSRR = (uint32_t)pin;
-    }
-}
 
 
 #ifdef __cplusplus

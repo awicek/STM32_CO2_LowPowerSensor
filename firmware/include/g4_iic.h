@@ -3,55 +3,63 @@
 
 #include "stm32g474xx.h"
 
-#include "stm32g4xx_ll_i2c.h"
-#include "stm32g4xx_ll_gpio.h"
-#include "main.h"
-#include "stm32g4xx_ll_i2c.h"
 #include "stm32g4xx_ll_bus.h"
-#include "stm32g4xx_ll_gpio.h"
-
+#include <cmsis_gcc.h>
+#include <stm32g4xx.h>
+#include "main.h"
 
 #ifdef __cplusplus
 extern  "C" {
 #endif
 
-
-
-void  iic_preinit()
+/**
+  * @brief Set target 7-bit address 
+  */ 
+__STATIC_INLINE void iic_set_target_7bit_addr(I2C_TypeDef *iic, uint8_t addr)
 {
-    __HAL_RCC_I2C1_CLK_ENABLE();
+    CLEAR_BIT(iic->CR2, I2C_CR2_ADD10);
+    MODIFY_REG(iic->CR2, I2C_CR2_SADD_Msk, (uint32_t)addr << 1U);
+}
 
-    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-    RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
-    PeriphClkInit.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-    {
-        Error_Handler();
-    }
+/**
+  * @brief Sets Automatic end. 
+  * For Controller transmision it automaticaly generates STOP condition after NBYTES transfered.
+  * For Controller reception it automaticaly generates NACK after NBYTES transfered.
+  */
+__STATIC_INLINE void iic_set_autoend(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->CR2, I2C_CR2_AUTOEND);
+}
 
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-    //   PC4   ------> I2C2_SCL
-    //   PA8   ------> I2C2_SDA
-    GPIO_InitStruct.Pin = LL_GPIO_PIN_4;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
-    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = LL_GPIO_PIN_8;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
-    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+/**
+  * @brief Start transaction.
+  */
+__STATIC_INLINE void iic_start_transaction(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->CR2, I2C_CR2_START);
+}
 
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
+
+/**
+  * @brief Setup Controler Read transaction. 
+  * @param size Expected number of bytes to receive.
+  */
+__STATIC_INLINE void iic_setup_controler_read_transaction(I2C_TypeDef *iic, uint8_t size)
+{
+    SET_BIT(iic->CR2, I2C_CR2_RD_WRN);
+    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
+}
+
+/**
+  * @brief Setup Controler Write transaction.
+  * @param size Number of bytes to send.
+  */
+__STATIC_INLINE void iic_setup_controler_write_transaction(I2C_TypeDef *iic, uint8_t size)
+{
+    CLEAR_BIT(iic->CR2, I2C_CR2_RD_WRN);
+    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
 }
 
 /* IIC init structure */
@@ -61,53 +69,40 @@ typedef struct
 } iic_init_t;
 
 
-void iic_init(I2C_TypeDef *iic, iic_init_t *settings)
-{
-    /* Disable IIC */
-    CLEAR_BIT(iic->CR1, I2C_CR1_PE);
 
-    /* Set timing register */ 
-    iic->TIMINGR = settings->timing;
+void  iic_preinit();
 
-    /* Set analog and digital filters */
-    CLEAR_BIT(iic->CR1, I2C_CR1_ANFOFF);
-    
-    /* Set control register 1 and 2 */
-    SET_BIT(iic->CR2, I2C_CR2_AUTOEND);
-    
-    /* Eneable IIC */
-    SET_BIT(iic->CR1, I2C_CR1_PE);
-}
+/**
+ *  @brief Initilalize the iic peripheral with given settings.
+ *  Befor calling this function, the clock has to be enbled for the corresponding iic peripheral.
+ *  Also the GPIO pins for SCL and SDA should be configured before calling this funciton.
+ *  @param iic IIC peripheral to initialize.
+ */
+void iic_init(I2C_TypeDef *iic, iic_init_t *settings);
 
+/**
+ *  @brief Transmit data to slave device.
+ *  Works only in the controler/master mode.
+ *  @param iic IIC peripheral to use for transmission.
+ *  @param addr 7-bit address of the slave device. It will be shifted left by this function. 
+ *  @param data Pointer to the data to transmit.
+ *  @param size Number of bytes to transmit. 
+ *  
+ *  @return Number of transmitted bytes.
+ */
+uint8_t iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint8_t size);
 
-int iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size)
-{
-    CLEAR_BIT(iic->CR2, I2C_CR2_ADD10);
-    MODIFY_REG(iic->CR2, I2C_CR2_SADD_Msk, (uint32_t)addr << (1U));
-
-    CLEAR_BIT(iic->CR2, I2C_CR2_RD_WRN);
-    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, size << I2C_CR2_NBYTES_Pos);
-
-    SET_BIT(iic->CR2, I2C_CR2_START);
-    for (size_t i = 0; i < size; ++i)
-    {
-        while (!(iic->ISR & I2C_ISR_TXIS)) {};
-        iic->TXDR = data[size - 1 - i];
-    }
-
-    /* Wait transfer complete */
-    while (!(iic->ISR & I2C_ISR_TC)){}
-
-    return 0;
-}
-
-int iic_receive(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size)
-{
-    
-
-    return 0;
-}
-
+/**
+ *  @brief Receive data from slave device.
+ *  Works only in the controler/master mode.
+ *  @param iic IIC peripheral to use for reception.
+ *  @param addr 7-bit address of the slave device. It will be shifted left by this function. 
+ *  @param data Pointer to the buffer to store received data.
+ *  @param size Number of bytes to receive.
+ * 
+ *  @return Number of received bytes.   
+ */
+uint8_t iic_receive(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size);
 
 #ifdef __cplusplus
 }

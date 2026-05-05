@@ -34,7 +34,12 @@ add_executable(main
     src/spi.c
 
     src/stm32g4xx_it.c
+
+    src/g4_iic.c
+    src/g4_gpio.c 
+    src/sys_tick.c
     
+    src/scd4x.cpp
     # fatfs/app/fatfs.c
     
     # fatfs/core/diskio.c
