@@ -12,8 +12,7 @@ SCD4X::SCD4X(I2C_TypeDef *iic) :
 uint64_t SCD4X::getSensorSerialNumber()
 {
     uint8_t data[9]; 
-    iic_transmit(iic_, ADDRESS, (uint8_t *)&GET_SERIAL_NUMBER, 2);
-
+    sendCommand(GET_SERIAL_NUMBER);
     sys_delay(2);
 
     iic_receive(iic_, ADDRESS, data, 9);
@@ -28,7 +27,7 @@ uint64_t SCD4X::getSensorSerialNumber()
 SCD4X::SensorVariant SCD4X::getSensorVariant()
 {
     uint8_t data[3];
-    iic_transmit(iic_, ADDRESS, (uint8_t *)&GET_SENSOR_VARIANT, 2);
+    sendCommand(GET_SENSOR_VARIANT);
     sys_delay(2);
     iic_receive(iic_, ADDRESS, data, 3);
 
@@ -46,19 +45,19 @@ SCD4X::SensorVariant SCD4X::getSensorVariant()
 
 void SCD4X::startPeriodicMeasurement()
 {
-    iic_transmit(iic_, ADDRESS, (uint8_t *)&START_PERIODIC_MEASUREMENT, 2);
+    sendCommand(START_PERIODIC_MEASUREMENT);
 }
 
 
 void SCD4X::stopPeriodicMesurement()
 {
-    iic_transmit(iic_, ADDRESS, (uint8_t *)&STOP_PERIODIC_MEASUREMENT, 2);
+    sendCommand(STOP_PERIODIC_MEASUREMENT);
 }
 
 
 SCD4X::Measurement SCD4X::getMeasurement()
 {   
-    iic_transmit(iic_, ADDRESS, (uint8_t *)&READ_MEASUREMENT, 2);
+    sendCommand(READ_MEASUREMENT);
     sys_delay(2);
 
     uint8_t data[9];
@@ -80,4 +79,37 @@ SCD4X::Measurement SCD4X::rawData2Mesurement(uint8_t *data)
                     (float)(((uint16_t)data[6] << 8) | (uint16_t)data[7]);
 
     return meas;
+}
+
+void SCD4X::sendCommand(uint16_t command)
+{
+    for (size_t i = 0; i < 5; ++i)
+    {
+        if (2 == iic_transmit(iic_, ADDRESS, (uint8_t *)&command, 2))
+        {
+            return;
+        }
+        sys_delay(10);
+    }
+}
+
+
+bool SCD4X::getDataReadyStatus()
+{ 
+    sendCommand(GET_DATA_READY_STATUS);
+    sys_delay(2);
+    uint8_t data[3];
+    iic_receive(iic_, ADDRESS, data, 3);
+
+    if  (((data[0] & 0x07) == 0) && (data[1] == 0))
+    {
+        return false;
+    }
+    return true;
+}
+
+
+void SCD4X::singleShotMesurement()
+{
+    sendCommand(MEASURE_SINGLE_SHOT);
 }

@@ -54,6 +54,13 @@ public:
     void startPeriodicMeasurement();
 
     /**
+    *  @brief Perform single shot mesurement.
+    *  Only for the SCD41 variant.
+    *  Call this once and after 5s the mesuremtnt will be ready to read with @getMeasurement()
+    */
+    void singleShotMesurement();
+
+    /**
     *  @brief Stop periodic mesurement mode.
     *  Blocking function.
     *  Sensor will take 500ms to stop messurement.
@@ -72,17 +79,13 @@ public:
     *  Blocking function.
     *  @return true if data is ready, false otherwise.
     */
-    bool getDataReadyStatys();
-
     bool getDataReadyStatus();
-    /** 
-     * @brief Destructor.
-     */
+
 
 private:    
 
     Measurement rawData2Mesurement(uint8_t *data);
-
+    void sendCommand(uint16_t command); 
     I2C_TypeDef *iic_;
 
     constexpr static uint8_t ADDRESS = 0x62;

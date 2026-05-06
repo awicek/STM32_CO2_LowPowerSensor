@@ -75,10 +75,13 @@ int main(void)
         printf("Sensor variant: SCD41\n\r");
     }   
      
-    co2_sensor.startPeriodicMeasurement();
+    co2_sensor.singleShotMesurement();
     while (1)
     {
-        sys_delay(8000);
+        while (!co2_sensor.getDataReadyStatus())
+        {
+            sys_delay(100);
+        } 
         auto measurement = co2_sensor.getMeasurement();
         printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
                 measurement.co2_ppm, measurement.temperature, measurement.humidity);

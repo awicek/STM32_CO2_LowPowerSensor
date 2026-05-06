@@ -63,6 +63,22 @@ __STATIC_INLINE uint32_t iic_is_active_flag_txis(I2C_TypeDef *iic)
 }
 
 /**
+ *  @brief Check for the Receive Data Register Not Empty flag.
+ */
+__STATIC_INLINE uint32_t iic_is_active_flag_rxne(I2C_TypeDef *iic)
+{
+    return (iic->ISR & I2C_ISR_RXNE);
+}
+
+/**
+ *  @brief Flush the received data by reading the RXDR register.
+ */
+__STATIC_INLINE void iic_flush_rxdr(I2C_TypeDef *iic)
+{
+    (void)iic->RXDR;
+}
+
+/**
  *  @brief Cecck for the Transfer Complete flag.
  *  Cleared by software when STOP or START bit is set.
  */
@@ -86,7 +102,9 @@ __STATIC_INLINE void iic_clear_flag_nackf(I2C_TypeDef *iic)
 {
     SET_BIT(iic->ICR, I2C_ICR_NACKCF);
 }
-
+/**
+ *  @brief Clear flag 
+ */
 /**
   * @brief Set target 7-bit address 
   */ 
