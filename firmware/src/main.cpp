@@ -39,7 +39,7 @@ int main(void)
     MX_GPIO_Init();
     MX_USART2_UART_Init();
     MX_I2C1_Init();
-
+    sys_delay(1000);
     //   PC4   ------> I2C2_SCL
     gpio_init_t gpio_settings = {0};
     gpio_settings.mode = GPIO_mode_alternate;
@@ -55,7 +55,12 @@ int main(void)
     iic_preinit(); 
     iic_init_t iic2_setting = {0x10D19CE4}; 
     iic_init(I2C2, &iic2_setting);
-
+    // uint8_t ret = iic_transmit(I2C2, 0x62, (uint8_t *)"Hello, World!", 13);
+    // if (ret != 13)
+    // {
+    //     printf("funguje mi to %d \n\r ", ret);
+    // }
+    sys_delay(10);
     SCD4X co2_sensor(I2C2); 
     uint64_t serial_number = co2_sensor.getSensorSerialNumber();
     printf("Serial number: %llu\n\r", serial_number);
@@ -77,64 +82,6 @@ int main(void)
         auto measurement = co2_sensor.getMeasurement();
         printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
                 measurement.co2_ppm, measurement.temperature, measurement.humidity);
-        // HAL_Delay(500);
-        // HAL_I2C_Master_Transmit(&hi2c1, SCD40::ADDRESS, (uint8_t*)&SCD40::GET_SENSOR_VARIANT, 2, HAL_MAX_DELAY);
-        // HAL_Delay(10);
-        // HAL_I2C_Master_Receive(&hi2c1, SCD40::ADDRESS, buffer, 3, HAL_MAX_DELAY);
-        // if (buffer[2] == 0b00010000)
-        // {
-        //     HAL_UART_Transmit(&huart2, (uint8_t*)"SCD40\n\r", 7, HAL_MAX_DELAY);
-        // }
-        // else
-        // {
-        //     HAL_UART_Transmit(&huart2, (uint8_t*)"SCD41\n\r", 7, HAL_MAX_DELAY);
-        // }
-
-        // HAL_Delay(100);
-
-        // HAL_I2C_Master_Transmit(&hi2c1, SCD40::ADDRESS,
-        //         (uint8_t*)&SCD40::GET_SENSOR_ALTITUDE, 2, HAL_MAX_DELAY);
-        // HAL_Delay(10);
-        // HAL_I2C_Master_Receive(&hi2c1, SCD40::ADDRESS,
-        //     buffer, 3, HAL_MAX_DELAY);
-        // while (true)
-        // {
-            
-        //     HAL_I2C_Master_Transmit(&hi2c1, SCD40::ADDRESS,
-        //         (uint8_t*)&SCD40::GET_DATA_READY_STATUS, 2, HAL_MAX_DELAY);
-        //         HAL_Delay(10);
-        //         HAL_I2C_Master_Receive(&hi2c1, SCD40::ADDRESS,
-        //             buffer, 3, HAL_MAX_DELAY);
-        //     if ((buffer[0] & 0x07) || (buffer[1] & 0xff))
-        //     {
-        //         break;
-        //     }
-        //     HAL_Delay(100);
-        // } 
-
-        // HAL_I2C_Master_Transmit(&hi2c1, SCD40::ADDRESS,
-        //         (uint8_t*)&SCD40::READ_MEASUREMENT, 2, HAL_MAX_DELAY);
-        // HAL_Delay(10);
-        // HAL_I2C_Master_Receive(&hi2c1, SCD40::ADDRESS,
-        //     buffer, 9, HAL_MAX_DELAY);
-
-
-        // uint16_t co2_raw  = (buffer[0] << 8) | buffer[1];
-        // uint16_t temp_raw = (buffer[3] << 8) | buffer[4];
-        // uint16_t rh_raw   = (buffer[6] << 8) | buffer[7];
-        // float temperature = -45.0f + 175.0f * ((float)temp_raw / 65535.0f);
-        // float humidity    = 100.0f * ((float)rh_raw / 65535.0f);
-        // float co2         = (float)co2_raw;
-
-        // char out[64];
-
-        // printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\r\n",
-        //         co2, temperature, humidity);
-
-
-        // HAL_UART_Transmit(&huart2, (uint8_t*)out, strlen(out), HAL_MAX_DELAY);
-        
-        // HAL_Delay(4000);
     }
 }
 

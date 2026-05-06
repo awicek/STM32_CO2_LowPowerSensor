@@ -15,6 +15,7 @@ uint64_t SCD4X::getSensorSerialNumber()
     iic_transmit(iic_, ADDRESS, (uint8_t *)&GET_SERIAL_NUMBER, 2);
 
     sys_delay(2);
+
     iic_receive(iic_, ADDRESS, data, 9);
     
     return ((uint64_t)data[0] << 56) | ((uint64_t)data[1] << 48) |
@@ -43,24 +44,40 @@ SCD4X::SensorVariant SCD4X::getSensorVariant()
 }
 
 
-
 void SCD4X::startPeriodicMeasurement()
 {
     iic_transmit(iic_, ADDRESS, (uint8_t *)&START_PERIODIC_MEASUREMENT, 2);
 }
 
+
+void SCD4X::stopPeriodicMesurement()
+{
+    iic_transmit(iic_, ADDRESS, (uint8_t *)&STOP_PERIODIC_MEASUREMENT, 2);
+}
+
+
 SCD4X::Measurement SCD4X::getMeasurement()
 {   
     iic_transmit(iic_, ADDRESS, (uint8_t *)&READ_MEASUREMENT, 2);
     sys_delay(2);
+
     uint8_t data[9];
     iic_receive(iic_, ADDRESS, data, 9);
-    Measurement measurement;
-    measurement.co2_ppm = (float)(((uint16_t)data[0] << 8)
-                        | (uint16_t)data[1]);
-    measurement.temperature = -45.0f + 175.0f * (float)(((uint16_t)data[3] << 8)
-                            | (uint16_t)data[4]) / 65535.0f;
-    measurement.humidity = 100.0f * (float)(((uint16_t)data[6] << 8)
-                        | (uint16_t)data[7]) / 65535.0f;
+
+    Measurement measurement = rawData2Mesurement(data);
     return measurement;
+}
+
+ 
+SCD4X::Measurement SCD4X::rawData2Mesurement(uint8_t *data)
+{
+    Measurement meas;
+    
+    meas.co2_ppm = (float)(((uint16_t)data[0] << 8) | (uint16_t)data[1]);
+    meas.temperature = -45.0f + 175.0f / 65535.0f *
+                       (float)(((uint16_t)data[3] << 8) | (uint16_t)data[4]);
+    meas.humidity = 100.0f / 65535.f *
+                    (float)(((uint16_t)data[6] << 8) | (uint16_t)data[7]);
+
+    return meas;
 }

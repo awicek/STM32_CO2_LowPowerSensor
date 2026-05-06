@@ -12,62 +12,11 @@
 extern  "C" {
 #endif
 
-/**
-  * @brief Set target 7-bit address 
-  */ 
-__STATIC_INLINE void iic_set_target_7bit_addr(I2C_TypeDef *iic, uint8_t addr)
-{
-    CLEAR_BIT(iic->CR2, I2C_CR2_ADD10);
-    MODIFY_REG(iic->CR2, I2C_CR2_SADD_Msk, (uint32_t)addr << 1U);
-}
-
-
-/**
-  * @brief Sets Automatic end. 
-  * For Controller transmision it automaticaly generates STOP condition after NBYTES transfered.
-  * For Controller reception it automaticaly generates NACK after NBYTES transfered.
-  */
-__STATIC_INLINE void iic_set_autoend(I2C_TypeDef *iic)
-{
-    SET_BIT(iic->CR2, I2C_CR2_AUTOEND);
-}
-
-
-/**
-  * @brief Start transaction.
-  */
-__STATIC_INLINE void iic_start_transaction(I2C_TypeDef *iic)
-{
-    SET_BIT(iic->CR2, I2C_CR2_START);
-}
-
-
-/**
-  * @brief Setup Controler Read transaction. 
-  * @param size Expected number of bytes to receive.
-  */
-__STATIC_INLINE void iic_setup_controler_read_transaction(I2C_TypeDef *iic, uint8_t size)
-{
-    SET_BIT(iic->CR2, I2C_CR2_RD_WRN);
-    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
-}
-
-/**
-  * @brief Setup Controler Write transaction.
-  * @param size Number of bytes to send.
-  */
-__STATIC_INLINE void iic_setup_controler_write_transaction(I2C_TypeDef *iic, uint8_t size)
-{
-    CLEAR_BIT(iic->CR2, I2C_CR2_RD_WRN);
-    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
-}
-
 /* IIC init structure */
 typedef struct 
 {
     uint32_t timing;            /* IIC timing */
 } iic_init_t;
-
 
 
 void  iic_preinit();
@@ -103,6 +52,108 @@ uint8_t iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint8_t size
  *  @return Number of received bytes.   
  */
 uint8_t iic_receive(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint32_t size);
+
+
+/**
+ *  @brief Check for the Transmit Interrupt flag.
+ */ 
+__STATIC_INLINE uint32_t iic_is_active_flag_txis(I2C_TypeDef *iic)
+{
+    return (iic->ISR & I2C_ISR_TXIS);
+}
+
+/**
+ *  @brief Cecck for the Transfer Complete flag.
+ *  Cleared by software when STOP or START bit is set.
+ */
+__STATIC_INLINE uint32_t iic_is_active_flag_tc(I2C_TypeDef *iic)
+{
+    return (iic->ISR & I2C_ISR_TC);
+}
+
+/**
+ *  @brief Check fo the Not Acknowledege Received flasg.
+ */
+__STATIC_INLINE uint32_t iic_is_active_flag_nackf(I2C_TypeDef *iic)
+{
+    return (iic->ISR & I2C_ISR_NACKF);
+}
+
+/**
+ *  @brief Clear flag Not Acknowledege Received.
+ */
+__STATIC_INLINE void iic_clear_flag_nackf(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->ICR, I2C_ICR_NACKCF);
+}
+
+/**
+  * @brief Set target 7-bit address 
+  */ 
+__STATIC_INLINE void iic_set_target_7bit_addr(I2C_TypeDef *iic, uint8_t addr)
+{
+    CLEAR_BIT(iic->CR2, I2C_CR2_ADD10);
+    MODIFY_REG(iic->CR2, I2C_CR2_SADD_Msk, (uint32_t)addr << 1U);
+}
+
+/**
+  * @brief Sets Automatic end. 
+  * For Controller transmision it automaticaly generates STOP condition after NBYTES transfered.
+  * For Controller reception it automaticaly generates NACK after NBYTES transfered.
+  */
+__STATIC_INLINE void iic_set_autoend(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->CR2, I2C_CR2_AUTOEND);
+}
+
+/**
+ *  @brief Disables Automatic end.
+ */
+__STATIC_INLINE void iic_clear_autoend(I2C_TypeDef *iic)
+{
+    CLEAR_BIT(iic->CR2, I2C_CR2_AUTOEND);
+}
+
+/**
+ *  @brief Send STOP condition. After next bit.
+ */
+__STATIC_INLINE void iic_send_stop(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->CR2, I2C_CR2_STOP);
+}
+
+/**
+  * @brief Start transaction.
+  */
+__STATIC_INLINE void iic_start_transaction(I2C_TypeDef *iic)
+{
+    SET_BIT(iic->CR2, I2C_CR2_START);
+}
+
+
+/**
+  * @brief Setup Controler Read transaction. 
+  * @param size Expected number of bytes to receive.
+  */
+__STATIC_INLINE void iic_setup_controler_read_transaction(I2C_TypeDef *iic, uint8_t size)
+{
+    SET_BIT(iic->CR2, I2C_CR2_RD_WRN);
+    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
+}
+
+/**
+  * @brief Setup Controler Write transaction.
+  * @param size Number of bytes to send.
+  */
+__STATIC_INLINE void iic_setup_controler_write_transaction(I2C_TypeDef *iic, uint8_t size)
+{
+    CLEAR_BIT(iic->CR2, I2C_CR2_RD_WRN);
+    MODIFY_REG(iic->CR2, I2C_CR2_NBYTES_Msk, (uint32_t)size << I2C_CR2_NBYTES_Pos);
+}
+
+
+
+
 
 #ifdef __cplusplus
 }

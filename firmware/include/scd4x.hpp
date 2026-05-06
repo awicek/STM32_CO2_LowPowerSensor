@@ -7,6 +7,9 @@
 
 /**
  *  @brief Implementation of High level driver for SCD4X sensor.
+ *  The SCD4X sends all the dat in Big Endian format. Stm32 works with Little Endian.
+ *  Because of difference in Endianess, there are conversion all over the class.
+ *  Functions that have "Blocking function" in their description uses the blocking iic functions.
  */
 class SCD4X
 {
@@ -24,21 +27,67 @@ public:
         float temperature;      // temperature in Celsius 
         float humidity;         // relative humidity in percent
     };
-
+    
+    /**
+    *  @brief Contructor.
+    */
     SCD4X(I2C_TypeDef *iic);
 
+    /**
+    *  @brief Reads the sensor's unique serial number.
+    *  Blocking function.
+    *  @return 64-bit unique serial number.
+    */
     uint64_t getSensorSerialNumber();
 
+    /**
+    *  @brief Reads the sensor variant (SCD40 or SCD41).
+    *  Blocking function.
+    *  @return SensorVariant.
+    */
     SensorVariant getSensorVariant();
 
+    /**
+    *  @brief Starts periodic measurement mode.
+    *  In this mode the sensor data can be read 
+    */
     void startPeriodicMeasurement();
 
-    Measurement getMeasurement();
-private:    
-    I2C_TypeDef *iic_;
-    constexpr static uint8_t ADDRESS = 0x62;
+    /**
+    *  @brief Stop periodic mesurement mode.
+    *  Blocking function.
+    *  Sensor will take 500ms to stop messurement.
+    */
+    void stopPeriodicMesurement();
 
+    /**
+    *  @brief Gets co2, temperature and humidity measurement.
+    *  Blocking function. @startPeriodicMeasurement() should be called before this function.
+    *  @return Measurements.
+    */
+    Measurement getMeasurement();
+
+    /**
+    *  @brief Get data redy status.
+    *  Blocking function.
+    *  @return true if data is ready, false otherwise.
+    */
+    bool getDataReadyStatys();
+
+    bool getDataReadyStatus();
+    /** 
+     * @brief Destructor.
+     */
+
+private:    
+
+    Measurement rawData2Mesurement(uint8_t *data);
+
+    I2C_TypeDef *iic_;
+
+    constexpr static uint8_t ADDRESS = 0x62;
     /* All possible registers for SCD4X sensor */
+    /* All the registers are converted to the Big endian format */ 
     // ===== Basic commands =====
     constexpr static uint16_t START_PERIODIC_MEASUREMENT      = 0xB121;
     constexpr static uint16_t READ_MEASUREMENT                = 0x05EC;
