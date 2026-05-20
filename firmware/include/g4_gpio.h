@@ -14,12 +14,12 @@ extern "C" {
 /* GPIO init structure */
 typedef struct
 {
-    uint32_t pins;           /* Which GPIO pin */ 
-    uint8_t mode;
-    uint8_t output_type;
-    uint32_t pull;          /* Pull-up or Pull-down activation */
-    uint32_t speed;         /* Speed for the selected pins */ 
-    uint32_t alternate;     /* Activates alternate function of the pin */ 
+    uint32_t pins;          /* GPIO_pin_ | GPIO_pin_  Which GPIO pin */
+    uint8_t mode;           /* GPIO_mode_             */
+    uint8_t output_type;    /* GPIO_otype             Push-pull or open-drain */
+    uint32_t pull;          /* GPIO_pupd              Pull-up or Pull-down activation */
+    uint32_t speed;         /* GPIO_speed_            Speed for the selected pins */ 
+    uint32_t alternate;     /* GPIO_af_               Activates alternate function of the pin */ 
 } gpio_init_t;
 
 
@@ -116,7 +116,7 @@ void gpio_reset(GPIO_TypeDef *port, uint16_t pin);
 /**
  *  Toggle gpio pin. Can toggle !!! only one !!! at once.
  */
-void gpio_toogle(GPIO_TypeDef *port, uint16_t pin);
+void gpio_togle(GPIO_TypeDef *port, uint16_t pin);
 
 
 

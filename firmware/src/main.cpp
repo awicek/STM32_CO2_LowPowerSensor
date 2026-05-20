@@ -5,9 +5,14 @@
 #include "spi.h"
 
 #include "stm32g4xx_hal.h"
+#include <Legacy/stm32_hal_legacy.h>
 #include <stdio.h>
 #include <string.h>
 #include <cstdarg>
+
+#include "g4_gpio.h"
+#include "g4_spi.h"
+
 
 #include <stm32g4xx_hal_flash_ex.h>
 
@@ -17,10 +22,8 @@
 #include <sys/cdefs.h>
 
 #include "fatfs.h"
-#include "stm32g4xx.h"
 
 
-#include "g4_gpio.h"
 void SystemClock_Config(void);
 
 
@@ -37,30 +40,46 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_USART2_UART_Init();
-
+    MX_SPI3_Init();
     setbuf(stdout, NULL);
-    gpio_init_t settings = {
-        .pins = GPIO_pin_2 | GPIO_pin_3,
+   
+    gpio_init_t led_init = {
+        .pins = GPIO_pin_2,
         .mode = GPIO_mode_output,
-        .pull = GPIO_pupd_pullup,
-        .speed = GPIO_speed_low,
-        .alternate = 0 
+        .output_type = GPIO_otype_pushpull,
+        .pull = GPIO_pupd_no,
+        .speed = GPIO_speed_high,
+        .alternate = 0,
+    };
+    gpio_init(GPIOD, &led_init);
+    gpio_set(GPIOD, GPIO_pin_2);
+    
+    spi_init_t spi_init_settings = {
+        .baudrate_prescaler = SPI_BAUDRATEPRESCALER_256,
+        .clock_polarity = SPI_clock_polarity_low,
+        .clock_phase = SPI_clock_phase_1edge,
+        .frame_format = SPI_format_msb_first,
+        .data_size =  SPI_ds_8bit
     };
 
-    gpio_init(GPIOC, &settings);
-    HAL_Delay(100);
-    
-    for (int i = 0; i < 10; i++)
-    {
-        gpio_set(GPIOC, GPIO_pin_2 | GPIO_pin_3);
-        HAL_Delay(100);
-        gpio_reset(GPIOC, GPIO_pin_2 | GPIO_pin_3 );
-        HAL_Delay(100);
-    }     
 
-    int c3 = gpio_read(GPIOC, GPIO_pin_3);
-    int c2 = gpio_read(GPIOC, GPIO_pin_2);
-    printf("c2 %d c3 %d \r\n", c2, c3);
+    spi_init(SPI3, &spi_init_settings);
+
+    uint8_t tx_data[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    spi_enable(SPI3);
+    HAL_Delay(100);
+   
+    gpio_reset(GPIOD, GPIO_pin_2);
+    spi_tx_rx(SPI3, tx_data, NULL, 10);
+    gpio_set(GPIOD, GPIO_pin_2);
+
+
+    
+
+
+    HAL_Delay(100);
+    printf("ahoj %d %d %f \r\n", 1, 2, 0.444); 
     
     while(1){};
     printf("ahoj%d%d  %f \r\n", 1, 2, 0.444); 

@@ -20,7 +20,8 @@ add_definitions(-Wall)
 add_definitions(-Wextra)
 
 find_package(CMSIS COMPONENTS STM32G4 REQUIRED)
-find_package(HAL COMPONENTS STM32G4 RCC PWR PCD UART USART GPIO DMA CORTEX SPI LL_SPI TIM I2C FLASH)
+find_package(HAL COMPONENTS STM32G4 RCC PWR PCD UART USART GPIO DMA CORTEX SPI TIM I2C FLASH
+             LL_RCC LL_PWR LL_GPIO LL_UTILS LL_I2C LL_SPI)
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
 set(PROJECT_NAME main)
@@ -46,6 +47,9 @@ add_executable(${PROJECT_NAME}
 
     fatfs/target/user_diskio.c
     fatfs/target/user_diskio_spi.c
+
+    src/g4_gpio.c
+
 )
 
 target_link_options(${PROJECT_NAME} PRIVATE
@@ -72,11 +76,15 @@ target_link_options(main PUBLIC -Wl,--print-memory-usage,--undefined=uxTopUsedPr
 
 target_link_libraries(main
   HAL::STM32::G4::RCC
+  HAL::STM32::G4::LL_RCC
   HAL::STM32::G4::RCCEx
   HAL::STM32::G4::PWR
+  HAL::STM32::G4::LL_PWR
   HAL::STM32::G4::PWREx
   HAL::STM32::G4::DMA
   HAL::STM32::G4::GPIO
+  HAL::STM32::G4::LL_GPIO
+  HAL::STM32::G4::LL_UTILS
   HAL::STM32::G4::CORTEX
   HAL::STM32::G4::UART
   HAL::STM32::G4::UARTEx
@@ -87,6 +95,7 @@ target_link_libraries(main
   HAL::STM32::G4::TIM
   HAL::STM32::G4::TIMEx
   HAL::STM32::G4::I2C
+  HAL::STM32::G4::LL_I2C
   HAL::STM32::G4::I2CEx
   HAL::STM32::G4::FLASH
   HAL::STM32::G4::FLASHEx

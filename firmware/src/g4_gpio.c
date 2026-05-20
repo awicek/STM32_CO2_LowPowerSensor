@@ -78,7 +78,7 @@ void gpio_reset(GPIO_TypeDef *port, uint16_t pin)
     port->BRR = (uint32_t)pin;
 }
 
-void gpio_toogle(GPIO_TypeDef *port, uint16_t pin)
+void gpio_togle(GPIO_TypeDef *port, uint16_t pin)
 {
     if (gpio_read(port, pin))
     {

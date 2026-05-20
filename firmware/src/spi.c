@@ -19,7 +19,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "spi.h"
-
+#include "stm32g4xx_ll_spi.h"
+#include "stm32g4xx_ll_bus.h"
+#include "stm32g4xx_ll_gpio.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -118,9 +120,9 @@ void MX_SPI3_Init(void)
   SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
   SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
   SPI_InitStruct.CRCPoly = 7;
-  LL_SPI_Init(SPI3, &SPI_InitStruct);
-  LL_SPI_SetStandard(SPI3, LL_SPI_PROTOCOL_MOTOROLA);
-  LL_SPI_DisableNSSPulseMgt(SPI3);
+  // LL_SPI_Init(SPI3, &SPI_InitStruct);
+  // LL_SPI_SetStandard(SPI3, LL_SPI_PROTOCOL_MOTOROLA);
+  // LL_SPI_DisableNSSPulseMgt(SPI3);
   /* USER CODE BEGIN SPI3_Init 2 */
 
   /* USER CODE END SPI3_Init 2 */
