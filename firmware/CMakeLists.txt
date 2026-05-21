@@ -38,17 +38,16 @@ add_executable(main
     src/g4_iic.c
     src/g4_gpio.c 
     src/sys_tick.c
-    
     src/scd4x.cpp
-    # fatfs/app/fatfs.c
-    
-    # fatfs/core/diskio.c
-    # fatfs/core/ff.c 
-    # fatfs/core/ff_gen_drv.c
-    # fatfs/core/option/syscall.c
 
-    # fatfs/target/user_diskio.c
-    # fatfs/target/user_diskio_spi.c
+    # sd card 
+    fatfs/app/fatfs.c 
+    fatfs/core/diskio.c
+    fatfs/core/ff.c 
+    fatfs/core/ff_gen_drv.c
+    fatfs/core/option/syscall.c
+    fatfs/target/user_diskio.c
+    fatfs/target/user_diskio_spi.c
 )
 
 target_include_directories(main PUBLIC

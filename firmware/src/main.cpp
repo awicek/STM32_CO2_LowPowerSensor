@@ -51,15 +51,14 @@ int main(void)
     gpio_leds.pins = GPIO_pin_0;
     gpio_init(GPIOB, &gpio_leds);
      
-
-    gpio_init(GPIOA, &gpio_leds);
-    while (1)
-    {
-        printf("ahoj\n\r"); //     gpio_toogle(GPIOA, GPIO_PIN_3);
-        sys_delay(500);
-        gpio_toogle(GPIOA, GPIO_PIN_3);
-        gpio_toogle(GPIOB, GPIO_PIN_0);
-    }
+    // while (1)
+    // {
+    //     printf("ahoj\n\r"); //     gpio_toogle(GPIOA, GPIO_PIN_3);
+    //     sys_delay(500);
+    //     gpio_toogle(GPIOA, GPIO_PIN_3);
+    //     gpio_toogle(GPIOB, GPIO_PIN_0);
+    // }
+   
 
     /* IIC  RTC pins PA8 PA9  */
     gpio_init_t gpio_settings = {
@@ -81,11 +80,88 @@ int main(void)
     iic_init_t iic_setting = {0x10D19CE4}; 
     // iic_init(I2C2, &iic_setting);
     iic_init(I2C1, &iic_setting); 
-   
+  
+    
+    /* Sd card   */ 
+    FATFS FatFs; 	//Fatfs handle
+    FIL fil; 		//File handle
+    FRESULT fres; //Result after operations
+
+    //Open the file system
+    while ((fres = f_mount(&FatFs, "", 1)) != FR_OK)
+    {
+        myprintf("f_mount error (%i)\r\n", fres);
+        HAL_Delay(1000);
+    }
+
+    //Let's get some statistics from the SD card
+    DWORD free_clusters, free_sectors, total_sectors;
+
+    FATFS* getFreeFs;
+
+    fres = f_getfree("", &free_clusters, &getFreeFs);
+    if (fres != FR_OK) {
+        myprintf("f_getfree error (%i)\r\n", fres);
+        while(1);
+    }
+
+    //Formula comes from ChaN's documentation
+    total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
+    free_sectors = free_clusters * getFreeFs->csize;
+
+    myprintf("SD card stats:\r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
+
+    //Now let's try to open file "test.txt"
+    fres = f_open(&fil, "test.txt", FA_READ);
+    if (fres != FR_OK) {
+        myprintf("f_open error (%i)\r\n", fres);
+    }
+    myprintf("I was able to open 'test.txt' for reading!\r\n");
+
+    //Read 30 bytes from "test.txt" on the SD card
+    BYTE readBuf[30];
+
+    //We can either use f_read OR f_gets to get data out of files
+    //f_gets is a wrapper on f_read that does some string formatting for us
+    TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
+    if(rres != 0) {
+        myprintf("Read string from 'test.txt' contents: %s\r\n", readBuf);
+    } else {
+        myprintf("f_gets error (%i)\r\n", fres);
+    }
+
+    //Be a tidy kiwi - don't forget to close your file!
+    f_close(&fil);
+
+    //Now let's try and write a file "write.txt"
+    fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+    if(fres == FR_OK) {
+        myprintf("I was able to open 'write.txt' for writing\r\n");
+    } else {
+        myprintf("f_open error (%i)\r\n", fres);
+    }
+
+    //Copy in a string
+    strncpy((char*)readBuf, "a new file is made!", 19);
+    UINT bytesWrote;
+    fres = f_write(&fil, readBuf, 19, &bytesWrote);
+    if(fres == FR_OK) {
+        myprintf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
+    } else {
+        myprintf("f_write error (%i)\r\n", fres);
+    }
+
+    //Be a tidy kiwi - don't forget to close your file!
+    f_close(&fil);
+
+    //We're done, so de-mount the drive
+    f_mount(NULL, "", 0)
+    /* ------------------------------------------------- */
+
     printf("ahoj %d :-D \n\r", 1);
         
     /* CO2 readout loop  */ 
-    sys_delay(10);
+    sys_delay(1000);
     SCD4X co2_sensor(I2C1); 
     uint64_t serial_number = co2_sensor.getSensorSerialNumber();
     printf("Serial number: %llu\n\r", serial_number);
@@ -99,7 +175,10 @@ int main(void)
     {
         printf("Sensor variant: SCD41\n\r");
     }   
-     
+    
+    gpio_reset(GPIOA, GPIO_PIN_3);
+    gpio_set(GPIOB, GPIO_PIN_0);    
+
     co2_sensor.startPeriodicMeasurement();
     while (1)
     {
@@ -110,6 +189,8 @@ int main(void)
         auto measurement = co2_sensor.getMeasurement();
         printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
                 measurement.co2_ppm, measurement.temperature, measurement.humidity);
+        gpio_toogle(GPIOA, GPIO_PIN_3);
+        gpio_toogle(GPIOB, GPIO_PIN_0);
     }
 }
 
