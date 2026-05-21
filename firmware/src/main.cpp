@@ -14,6 +14,7 @@
 
 #include <cstdint>
 #include <stdio.h>
+#include <stm32g4xx_hal_gpio.h>
 #include <string.h>
 
 #include <stm32g4xx_hal_flash_ex.h>
@@ -30,38 +31,62 @@ extern "C" int _write(int file, char *ptr, int len)
 };
 
 
-
 int main(void)
 {
     HAL_Init();
     SystemClock_Config();
-
     MX_GPIO_Init();
     MX_USART2_UART_Init();
-    MX_I2C1_Init();
     sys_delay(1000);
-    //   PC4   ------> I2C2_SCL
-    gpio_init_t gpio_settings = {0};
-    gpio_settings.mode = GPIO_mode_alternate;
-    gpio_settings.pins = GPIO_pin_4;
-    gpio_settings.output_type = GPIO_otype_opendrain;
-    gpio_settings.speed = GPIO_speed_low;
-    gpio_settings.pull = GPIO_pupd_pullup;
-    gpio_settings.alternate = GPIO_af_4;
-    gpio_init(GPIOC, &gpio_settings);
-    gpio_settings.pins = GPIO_pin_8;
+
+    gpio_init_t gpio_leds = {
+            .pins = GPIO_PIN_3,
+            .mode = GPIO_mode_output,
+            .output_type = GPIO_otype_pushpull,
+            .pull = GPIO_pupd_no,
+            .speed = GPIO_speed_low,
+            .alternate = 0
+    };
+    gpio_init(GPIOA, &gpio_leds);
+    gpio_leds.pins = GPIO_pin_0;
+    gpio_init(GPIOB, &gpio_leds);
+     
+
+    gpio_init(GPIOA, &gpio_leds);
+    while (1)
+    {
+        printf("ahoj\n\r"); //     gpio_toogle(GPIOA, GPIO_PIN_3);
+        sys_delay(500);
+        gpio_toogle(GPIOA, GPIO_PIN_3);
+        gpio_toogle(GPIOB, GPIO_PIN_0);
+    }
+
+    /* IIC  RTC pins PA8 PA9  */
+    gpio_init_t gpio_settings = {
+            .pins = GPIO_pin_8 | GPIO_PIN_9,
+            .mode = GPIO_mode_alternate,
+            .output_type = GPIO_otype_opendrain,
+            .pull = GPIO_pupd_no,
+            .speed = GPIO_speed_low,
+            .alternate = GPIO_af_4};
+    // gpio_init(GPIOA, &gpio_settings);
+
+    /* IIC CO2 GPIO PA15 PB7 */
+    gpio_settings.pins = GPIO_PIN_15;
     gpio_init(GPIOA, &gpio_settings);
+    gpio_settings.pins = GPIO_PIN_7;
+    gpio_init(GPIOB, &gpio_settings);
 
     iic_preinit(); 
-    iic_init_t iic2_setting = {0x10D19CE4}; 
-    iic_init(I2C2, &iic2_setting);
-    // uint8_t ret = iic_transmit(I2C2, 0x62, (uint8_t *)"Hello, World!", 13);
-    // if (ret != 13)
-    // {
-    //     printf("funguje mi to %d \n\r ", ret);
-    // }
+    iic_init_t iic_setting = {0x10D19CE4}; 
+    // iic_init(I2C2, &iic_setting);
+    iic_init(I2C1, &iic_setting); 
+   
+    printf("ahoj %d :-D \n\r", 1);
+        
+    /* CO2 readout loop  */ 
     sys_delay(10);
-    SCD4X co2_sensor(I2C2); 
+    SCD4X co2_sensor(I2C1); 
     uint64_t serial_number = co2_sensor.getSensorSerialNumber();
     printf("Serial number: %llu\n\r", serial_number);
     sys_delay(10);
@@ -75,12 +100,12 @@ int main(void)
         printf("Sensor variant: SCD41\n\r");
     }   
      
-    co2_sensor.singleShotMesurement();
+    co2_sensor.startPeriodicMeasurement();
     while (1)
     {
         while (!co2_sensor.getDataReadyStatus())
         {
-            sys_delay(100);
+            sys_delay(1000);
         } 
         auto measurement = co2_sensor.getMeasurement();
         printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",

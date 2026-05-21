@@ -13,11 +13,19 @@ void  iic_preinit()
         Error_Handler();
     }
 
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-
-
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
+
+
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+    PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+
+
 }
 
 void iic_init(I2C_TypeDef *iic, iic_init_t *settings)
@@ -68,7 +76,7 @@ uint8_t iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint8_t size
         {
             iic_send_stop(iic);
             break;
-        }
+        };
         if (iic_is_active_flag_nackf(iic))
         {
             iic_clear_flag_nackf(iic);
