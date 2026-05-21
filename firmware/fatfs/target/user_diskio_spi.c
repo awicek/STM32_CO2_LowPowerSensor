@@ -24,7 +24,7 @@
 
 //It is designed to be wrapped by a cubemx generated user_diskio.c file.
 
-#include "stm32l0xx_hal.h" /* Provide the low-level HAL functions */
+#include "stm32g4xx_hal.h" /* Provide the low-level HAL functions */
 #include "user_diskio_spi.h"
 
 //Make sure you set #define SD_SPI_HANDLE as some hspix in main.h
@@ -35,7 +35,7 @@ extern SPI_HandleTypeDef SD_SPI_HANDLE;
 /* Function prototypes */
 
 //(Note that the _256 is used as a mask to clear the prescalar bits as it provides binary 111 in the correct position)
-#define FCLK_SLOW() { MODIFY_REG(SD_SPI_HANDLE.Instance->CR1, SPI_BAUDRATEPRESCALER_256, SPI_BAUDRATEPRESCALER_128); }	/* Set SCLK = slow, approx 280 KBits/s*/
+#define FCLK_SLOW() { MODIFY_REG(SD_SPI_HANDLE.Instance->CR1, SPI_BAUDRATEPRESCALER_256, SPI_BAUDRATEPRESCALER_256); }	/* Set SCLK = slow, approx 280 KBits/s*/
 #define FCLK_FAST() { MODIFY_REG(SD_SPI_HANDLE.Instance->CR1, SPI_BAUDRATEPRESCALER_256, SPI_BAUDRATEPRESCALER_8); }	/* Set SCLK = fast, approx 4.5 MBits/s */
 
 #define CS_HIGH()	{HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);}
@@ -322,7 +322,7 @@ inline DSTATUS USER_SPI_initialize (
 {
 	BYTE n, cmd, ty, ocr[4];
 
-	if (drv != 0) return STA_NOINIT;		/* Supports only drive 0 */
+ 	if (drv != 0) return STA_NOINIT;		/* Supports only drive 0 */
 	//assume SPI already init init_spi();	/* Initialize SPI */
 
 	if (Stat & STA_NODISK) return Stat;	/* Is card existing in the soket? */
