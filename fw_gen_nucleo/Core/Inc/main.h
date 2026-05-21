@@ -30,7 +30,6 @@ extern "C" {
 #include "stm32g4xx_hal.h"
 
 #include "stm32g4xx_ll_i2c.h"
-#include "stm32g4xx_ll_spi.h"
 #include "stm32g4xx_ll_bus.h"
 #include "stm32g4xx_ll_cortex.h"
 #include "stm32g4xx_ll_rcc.h"

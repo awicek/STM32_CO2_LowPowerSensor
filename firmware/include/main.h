@@ -24,9 +24,9 @@ void Error_Handler(void);
 #define T_SWO_GPIO_Port GPIOB
 
 /* sd_card spi interface binds */
-#define SD_CS_GPIO_Port GPIOB
-#define SD_CS_Pin GPIO_PIN_1
-#define SD_SPI_HANDLE hspi2 
+#define SD_CS_GPIO_Port GPIOA
+#define SD_CS_Pin GPIO_PIN_4
+#define SD_SPI_HANDLE hspi1
 
 
 #ifdef __cplusplus
