@@ -39,6 +39,7 @@ add_executable(main
     src/g4_gpio.c 
     src/sys_tick.c
     src/scd4x.cpp
+    src/rtc_rv3028.cpp  
 
     # sd card 
     fatfs/app/fatfs.c 

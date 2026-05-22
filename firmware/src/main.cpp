@@ -8,8 +8,9 @@
 #include "g4_iic.h"
 #include "g4_gpio.h"
 #include "stm32g4xx_hal.h"
-#include  "scd4x.hpp"
 
+#include "scd4x.hpp"
+#include "rtc_rv3028.hpp"
 
 #include <cstdint>
 #include <stdio.h>
@@ -39,30 +40,30 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
     MX_GPIO_Init();
-    MX_SPI1_Init();
-    MX_USART2_UART_Init();
-    sys_delay(1000);
-
     gpio_init_t gpio_leds = {
-            .pins = GPIO_PIN_3,
+            .pins = GPIO_PIN_0,
             .mode = GPIO_mode_output,
             .output_type = GPIO_otype_pushpull,
             .pull = GPIO_pupd_no,
             .speed = GPIO_speed_low,
             .alternate = 0
     };
+    gpio_init(GPIOA, &gpio_leds); 
+    gpio_set(GPIOA, GPIO_PIN_0);
+
+    MX_SPI1_Init();
+    MX_USART2_UART_Init();
+
+    gpio_leds.pins = GPIO_PIN_3;
     gpio_init(GPIOA, &gpio_leds);
-    gpio_leds.pins = GPIO_pin_0;
-    gpio_init(GPIOB, &gpio_leds); 
     gpio_leds.pins = GPIO_PIN_0;
-    gpio_init(GPIOA, &gpio_leds);    
+    gpio_init(GPIOB, &gpio_leds);    
 
     
     gpio_set(GPIOA, GPIO_PIN_3);
     gpio_set(GPIOB, GPIO_PIN_0);
-    gpio_set(GPIOA, GPIO_PIN_0);
 
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < 4; i++)
     {
         gpio_toogle(GPIOA, GPIO_PIN_3);
         gpio_toogle(GPIOB, GPIO_PIN_0);
@@ -77,7 +78,6 @@ int main(void)
     //     gpio_toogle(GPIOB, GPIO_PIN_0);
     // }
    
-
     /* IIC  RTC pins PA8 PA9  */
     gpio_init_t gpio_settings = {
             .pins = GPIO_pin_8 | GPIO_PIN_9,
@@ -100,11 +100,41 @@ int main(void)
     iic_init(I2C2, &iic_setting);
     iic_init(I2C1, &iic_setting); 
 
-    uint8_t data[3] = {1,2,3};
-    iic_transmit(I2C2,0x52, data, 3);
-    sys_delay(10);
+
+    /*  --------  co2 test  ---------------- */
+    SCD4X co2_sensor(I2C1);
+    printf("Serial number: %llu\n\r", co2_sensor.getSensorSerialNumber());
+
+    co2_sensor.startPeriodicMeasurement(); 
     
+    while (!co2_sensor.getDataReadyStatus())
+    {
+        sys_delay(1000);
+    } 
+    auto measurement = co2_sensor.getMeasurement();
+    printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
+                measurement.co2_ppm, measurement.temperature, measurement.humidity);
+
+    /* --------------------------------------  */   
+
+    /*  --------  rtc test  ---------------- */
+    RTC_RV3028 rtc(I2C2);
+    rtc.setAlarm(0, 1);
+    uint8_t id = rtc.readID();
+    printf("RTC ID: 0x%02X\n\r", id);
+    
+    for (size_t i = 0; i < 4; i++)
+    {
+        gpio_toogle(GPIOA, GPIO_PIN_3); 
+        gpio_toogle(GPIOB, GPIO_PIN_0);
+        sys_delay(100);
+    }
+    /* --------------------------------------  */   
+    
+
+    gpio_reset(GPIOA, GPIO_PIN_0);
     while(1);
+
     /* ----------- Sd card -------------*/ 
     MX_FATFS_Init();
     printf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
@@ -180,7 +210,6 @@ int main(void)
         
     /* CO2 readout loop  */ 
     sys_delay(1000);
-    SCD4X co2_sensor(I2C1); 
     uint64_t serial_number = co2_sensor.getSensorSerialNumber();
     printf("Serial number: %llu\n\r", serial_number);
     sys_delay(10);
