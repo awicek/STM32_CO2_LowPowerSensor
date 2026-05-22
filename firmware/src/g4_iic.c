@@ -52,6 +52,7 @@ uint8_t iic_transmit(I2C_TypeDef *iic, uint8_t addr, uint8_t *data, uint8_t size
     iic_setup_controler_write_transaction(iic, size);
 
     iic_start_transaction(iic); 
+
     
     for (uint8_t i = 0; i < size; ++i)
     {

@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <stdio.h>
+#include <stm32g474xx.h>
 #include <stm32g4xx_hal_gpio.h>
 #include <string.h>
 
@@ -52,11 +53,25 @@ int main(void)
     };
     gpio_init(GPIOA, &gpio_leds);
     gpio_leds.pins = GPIO_pin_0;
-    gpio_init(GPIOB, &gpio_leds);
-     
-    // while (1)
+    gpio_init(GPIOB, &gpio_leds); 
+    gpio_leds.pins = GPIO_PIN_0;
+    gpio_init(GPIOA, &gpio_leds);    
+
+    
+    gpio_set(GPIOA, GPIO_PIN_3);
+    gpio_set(GPIOB, GPIO_PIN_0);
+    gpio_set(GPIOA, GPIO_PIN_0);
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        gpio_toogle(GPIOA, GPIO_PIN_3);
+        gpio_toogle(GPIOB, GPIO_PIN_0);
+        sys_delay(200);
+    }
+    // gpio_reset(GPIOA, GPIO_PIN_0);
+
+    // while(1)
     // {
-    //     printf("ahoj\n\r"); //     gpio_toogle(GPIOA, GPIO_PIN_3);
     //     sys_delay(500);
     //     gpio_toogle(GPIOA, GPIO_PIN_3);
     //     gpio_toogle(GPIOB, GPIO_PIN_0);
@@ -68,23 +83,28 @@ int main(void)
             .pins = GPIO_pin_8 | GPIO_PIN_9,
             .mode = GPIO_mode_alternate,
             .output_type = GPIO_otype_opendrain,
-            .pull = GPIO_pupd_no,
+            .pull = GPIO_pupd_pullup,
             .speed = GPIO_speed_low,
             .alternate = GPIO_af_4};
-    // gpio_init(GPIOA, &gpio_settings);
+    gpio_init(GPIOA, &gpio_settings);
 
     /* IIC CO2 GPIO PA15 PB7 */
+    gpio_settings.pull = GPIO_pupd_no;
     gpio_settings.pins = GPIO_PIN_15;
     gpio_init(GPIOA, &gpio_settings);
     gpio_settings.pins = GPIO_PIN_7;
     gpio_init(GPIOB, &gpio_settings);
 
     iic_preinit(); 
-    iic_init_t iic_setting = {0x10D19CE4}; 
-    // iic_init(I2C2, &iic_setting);
+    iic_init_t iic_setting = {0x00805C87}; 
+    iic_init(I2C2, &iic_setting);
     iic_init(I2C1, &iic_setting); 
-  
+
+    uint8_t data[3] = {1,2,3};
+    iic_transmit(I2C2,0x52, data, 3);
+    sys_delay(10);
     
+    while(1);
     /* ----------- Sd card -------------*/ 
     MX_FATFS_Init();
     printf("\r\n~ SD card demo by kiwih ~\r\n\r\n");
@@ -127,7 +147,7 @@ int main(void)
     printf("I was able to open 'test.txt' for reading!\r\n");
 
     //Read 30 bytes from "test.txt" on the SD card
-    BYTE readBuf[30];
+    BYTE readBuf[100];
 
     //We can either use f_read OR f_gets to get data out of files
     //f_gets is a wrapper on f_read that does some string formatting for us
@@ -142,28 +162,18 @@ int main(void)
     f_close(&fil);
 
     //Now let's try and write a file "write.txt"
-    fres = f_open(&fil, "write.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+    // fres = f_open(&fil, "co2_data.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
+    fres = f_open(&fil, "co2_data.txt", FA_WRITE | FA_OPEN_APPEND);
     if(fres == FR_OK) {
-        printf("I was able to open 'write.txt' for writing\r\n");
+        printf("I was able to open 'co2_data.txt' for writing\r\n");
     } else {
         printf("f_open error (%i)\r\n", fres);
     }
 
     //Copy in a string
-    strncpy((char*)readBuf, "a new file is made!", 19);
-    UINT bytesWrote;
-    fres = f_write(&fil, readBuf, 19, &bytesWrote);
-    if(fres == FR_OK) {
-        printf("Wrote %i bytes to 'write.txt'!\r\n", bytesWrote);
-    } else {
-        printf("f_write error (%i)\r\n", fres);
-    }
 
-    //Be a tidy kiwi - don't forget to close your file!
-    f_close(&fil);
-
-    //We're done, so de-mount the drive
-    f_mount(NULL, "", 0);
+    
+    
     /* ------------------------------------------------- */
 
     printf("ahoj %d :-D \n\r", 1);
@@ -185,10 +195,13 @@ int main(void)
     }   
     
     gpio_reset(GPIOA, GPIO_PIN_3);
-    gpio_set(GPIOB, GPIO_PIN_0);    
+    gpio_reset(GPIOB, GPIO_PIN_0);    
 
     co2_sensor.startPeriodicMeasurement();
-    while (1)
+    
+    
+    
+    for (size_t i = 0; i < 200; i++)
     {
         while (!co2_sensor.getDataReadyStatus())
         {
@@ -197,9 +210,29 @@ int main(void)
         auto measurement = co2_sensor.getMeasurement();
         printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
                 measurement.co2_ppm, measurement.temperature, measurement.humidity);
+       
+        
+        int len = snprintf((char*)readBuf, sizeof(readBuf), "CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
+                measurement.co2_ppm, measurement.temperature, measurement.humidity);
+        len -= 1;
+        UINT bytesWrote;
+        fres = f_write(&fil, readBuf, len, &bytesWrote);
+        if(fres == FR_OK) {
+            printf("Wrote %i bytes to 'co2_data.txt'!\r\n", bytesWrote);
+        } else {
+            printf("f_write error (%i)\r\n", fres);
+        }
+        
         gpio_toogle(GPIOA, GPIO_PIN_3);
-        gpio_toogle(GPIOB, GPIO_PIN_0);
     }
+     
+    gpio_reset(GPIOA, GPIO_PIN_3);
+    gpio_set(GPIOB, GPIO_PIN_0);
+    f_close(&fil);
+    f_mount(NULL, "", -1);
+    gpio_set(GPIOA, GPIO_PIN_3);
+
+    while(1);
 }
 
 
@@ -248,7 +281,15 @@ void SystemClock_Config(void)
 
 void Error_Handler(void)
 {
-    __disable_irq();
+
+    while(1)
+    {
+        sys_delay(500);
+        gpio_toogle(GPIOA, GPIO_PIN_3);
+        gpio_toogle(GPIOB, GPIO_PIN_0);
+    }
+
+    // __disable_irq();
     while (1)
     {
     }
