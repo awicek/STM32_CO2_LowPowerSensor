@@ -23,6 +23,8 @@
 #include <stm32g4xx_hal_def.h>
 #include <stm32g4xx_hal_i2c.h> 
 #include <stm32g4xx_hal_uart.h>
+#include <stm32g4xx_ll_gpio.h>
+#include <stm32g4xx_ll_i2c.h>
 
 #include <stm32g4xx_hal_flash_ex.h>
 #include "fatfs.h"
@@ -78,31 +80,44 @@ int main(void)
     //     gpio_toogle(GPIOB, GPIO_PIN_0);
     // }
    
+    
     /* IIC  RTC pins PA8 PA9  */
     gpio_init_t gpio_settings = {
-            .pins = GPIO_pin_8 | GPIO_PIN_9,
-            .mode = GPIO_mode_alternate,
-            .output_type = GPIO_otype_opendrain,
-            .pull = GPIO_pupd_pullup,
-            .speed = GPIO_speed_low,
-            .alternate = GPIO_af_4};
-    gpio_init(GPIOA, &gpio_settings);
+        .pins = GPIO_pin_8 | GPIO_PIN_9,
+        .mode = GPIO_mode_alternate,
+        .output_type = GPIO_otype_opendrain,
+        .pull = GPIO_pupd_no,
+        .speed = GPIO_speed_veryhigh,
+        .alternate = GPIO_af_4};
+        gpio_init(GPIOA, &gpio_settings);
 
-    /* IIC CO2 GPIO PA15 PB7 */
-    gpio_settings.pull = GPIO_pupd_no;
-    gpio_settings.pins = GPIO_PIN_15;
-    gpio_init(GPIOA, &gpio_settings);
-    gpio_settings.pins = GPIO_PIN_7;
-    gpio_init(GPIOB, &gpio_settings);
-
+    // /* IIC CO2 GPIO PA15 PB7 */
+    // gpio_settings.pins = GPIO_PIN_15;
+    // gpio_settings.mode = GPIO_mode_output;
+    // gpio_init(GPIOA, &gpio_settings);
+    // gpio_settings.pins = GPIO_PIN_7;
+    // gpio_init(GPIOB, &gpio_settings);
+    // gpio_set(GPIOA, GPIO_PIN_15);
+    // gpio_set(GPIOB, GPIO_PIN_7);
+    // sys_delay(100);
+    
+    // gpio_settings.mode = GPIO_mode_alternate;
+    // gpio_init(GPIOB, &gpio_settings);
+    // gpio_settings.pins = GPIO_PIN_15;
+    // gpio_init(GPIOA, &gpio_settings);
+            
+        
+        
+        
     iic_preinit(); 
-    iic_init_t iic_setting = {0x00805C87}; 
+    iic_init_t iic_setting = {0x10D19CE4}; 
     iic_init(I2C2, &iic_setting);
-    iic_init(I2C1, &iic_setting); 
-
+    // iic_init(I2C1, &iic_setting); 
 
     /*  --------  co2 test  ---------------- */
-    SCD4X co2_sensor(I2C1);
+    printf("ahoj %d :-D \n\r", 1);
+    SCD4X co2_sensor(I2C2);
+    sys_delay(1000);
     printf("Serial number: %llu\n\r", co2_sensor.getSensorSerialNumber());
 
     co2_sensor.startPeriodicMeasurement(); 

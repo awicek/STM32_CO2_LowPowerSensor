@@ -16,6 +16,8 @@ void  iic_preinit()
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
 
 
+
+
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
     PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
