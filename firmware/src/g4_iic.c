@@ -18,14 +18,14 @@ void  iic_preinit()
 
 
 
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
-    PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-    {
-        Error_Handler();
-    }
+    // PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+    // PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+    // if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    // {
+    //     Error_Handler();
+    // }
 
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+    // LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
 
 
 }

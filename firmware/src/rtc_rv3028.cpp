@@ -118,8 +118,6 @@ void RTC_RV3028::setAlarmRegisters(uint8_t seconds, uint8_t minutes)
 
 void RTC_RV3028::setAlarm(uint8_t second, uint8_t minute)
 {
-    RegStatus status = getStatus();
-    printf("Status before setting alarm: 0x%02X\n\r", status.raw);
     clearInterruptFlags();  
     disableAllInterrupts();
 

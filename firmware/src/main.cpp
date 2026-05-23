@@ -42,6 +42,8 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
     MX_GPIO_Init();
+
+    /* MCU POWER ON PIN PA0 */  
     gpio_init_t gpio_leds = {
             .pins = GPIO_PIN_0,
             .mode = GPIO_mode_output,
@@ -52,76 +54,49 @@ int main(void)
     };
     gpio_init(GPIOA, &gpio_leds); 
     gpio_set(GPIOA, GPIO_PIN_0);
+    /* ---------------------- */
 
-    MX_SPI1_Init();
-    MX_USART2_UART_Init();
 
+    /* Pheripheral Init  */ 
     gpio_leds.pins = GPIO_PIN_3;
     gpio_init(GPIOA, &gpio_leds);
     gpio_leds.pins = GPIO_PIN_0;
-    gpio_init(GPIOB, &gpio_leds);    
+    gpio_init(GPIOB, &gpio_leds);   
+    MX_SPI1_Init();
+    MX_USART2_UART_Init();
+        /* IIC RTC and CO2 */
+        gpio_init_t gpio_settings = {
+            .pins = GPIO_pin_8 | GPIO_PIN_9,
+            .mode = GPIO_mode_alternate,
+            .output_type = GPIO_otype_opendrain,
+            .pull = GPIO_pupd_no,
+            .speed = GPIO_speed_veryhigh,
+            .alternate = GPIO_af_4};
+        gpio_init(GPIOA, &gpio_settings);
+        iic_preinit(); 
+        iic_init_t iic_setting = {0x10D19CE4}; 
+        iic_init(I2C2, &iic_setting);
+        /* ------------------------ */ 
+    /* ---------------------- */
 
+    /*  --------  RTC Alarm  ---------------- */
+    RTC_RV3028 rtc(I2C2);
+    rtc.setAlarm(0, 1);
+    uint8_t id = rtc.readID();
+    printf("RTC ID: 0x%02X\n\r", id);
+    /* --------------------------------------  */   
     
-    gpio_set(GPIOA, GPIO_PIN_3);
-    gpio_set(GPIOB, GPIO_PIN_0);
-
     for (size_t i = 0; i < 4; i++)
     {
-        gpio_toogle(GPIOA, GPIO_PIN_3);
-        gpio_toogle(GPIOB, GPIO_PIN_0);
-        sys_delay(200);
+        gpio_toogle(GPIOA, GPIO_PIN_3); 
+        sys_delay(100);
     }
-    // gpio_reset(GPIOA, GPIO_PIN_0);
-
-    // while(1)
-    // {
-    //     sys_delay(500);
-    //     gpio_toogle(GPIOA, GPIO_PIN_3);
-    //     gpio_toogle(GPIOB, GPIO_PIN_0);
-    // }
-   
-    
-    /* IIC  RTC pins PA8 PA9  */
-    gpio_init_t gpio_settings = {
-        .pins = GPIO_pin_8 | GPIO_PIN_9,
-        .mode = GPIO_mode_alternate,
-        .output_type = GPIO_otype_opendrain,
-        .pull = GPIO_pupd_no,
-        .speed = GPIO_speed_veryhigh,
-        .alternate = GPIO_af_4};
-        gpio_init(GPIOA, &gpio_settings);
-
-    // /* IIC CO2 GPIO PA15 PB7 */
-    // gpio_settings.pins = GPIO_PIN_15;
-    // gpio_settings.mode = GPIO_mode_output;
-    // gpio_init(GPIOA, &gpio_settings);
-    // gpio_settings.pins = GPIO_PIN_7;
-    // gpio_init(GPIOB, &gpio_settings);
-    // gpio_set(GPIOA, GPIO_PIN_15);
-    // gpio_set(GPIOB, GPIO_PIN_7);
-    // sys_delay(100);
-    
-    // gpio_settings.mode = GPIO_mode_alternate;
-    // gpio_init(GPIOB, &gpio_settings);
-    // gpio_settings.pins = GPIO_PIN_15;
-    // gpio_init(GPIOA, &gpio_settings);
-            
-        
-        
-        
-    iic_preinit(); 
-    iic_init_t iic_setting = {0x10D19CE4}; 
-    iic_init(I2C2, &iic_setting);
-    // iic_init(I2C1, &iic_setting); 
 
     /*  --------  co2 test  ---------------- */
-    printf("ahoj %d :-D \n\r", 1);
     SCD4X co2_sensor(I2C2);
-    sys_delay(1000);
     printf("Serial number: %llu\n\r", co2_sensor.getSensorSerialNumber());
 
-    co2_sensor.startPeriodicMeasurement(); 
-    
+    co2_sensor.startPeriodicMeasurement();  
     while (!co2_sensor.getDataReadyStatus())
     {
         sys_delay(1000);
@@ -129,26 +104,14 @@ int main(void)
     auto measurement = co2_sensor.getMeasurement();
     printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
                 measurement.co2_ppm, measurement.temperature, measurement.humidity);
-
     /* --------------------------------------  */   
 
-    /*  --------  rtc test  ---------------- */
-    RTC_RV3028 rtc(I2C2);
-    rtc.setAlarm(0, 1);
-    uint8_t id = rtc.readID();
-    printf("RTC ID: 0x%02X\n\r", id);
     
     for (size_t i = 0; i < 4; i++)
     {
-        gpio_toogle(GPIOA, GPIO_PIN_3); 
-        gpio_toogle(GPIOB, GPIO_PIN_0);
+        gpio_toogle(GPIOB, GPIO_PIN_0); 
         sys_delay(100);
     }
-    /* --------------------------------------  */   
-    
-
-    gpio_reset(GPIOA, GPIO_PIN_0);
-    while(1);
 
     /* ----------- Sd card -------------*/ 
     MX_FATFS_Init();
@@ -164,7 +127,7 @@ int main(void)
     while ((fres = f_mount(&FatFs, "", 1)) != FR_OK)
     {
         printf("f_mount error (%i)\r\n", fres);
-        HAL_Delay(1000);
+        gpio_reset(GPIOA, GPIO_PIN_0);
     }
 
     //Let's get some statistics from the SD card
@@ -184,29 +147,8 @@ int main(void)
 
     printf("SD card stats:\r\n%10lu KiB total drive space.\r\n%10lu KiB available.\r\n", total_sectors / 2, free_sectors / 2);
 
-    //Now let's try to open file "test.txt"
-    fres = f_open(&fil, "test.txt", FA_READ);
-    if (fres != FR_OK) {
-        printf("f_open error (%i)\r\n", fres);
-    }
-    printf("I was able to open 'test.txt' for reading!\r\n");
-
-    //Read 30 bytes from "test.txt" on the SD card
     BYTE readBuf[100];
 
-    //We can either use f_read OR f_gets to get data out of files
-    //f_gets is a wrapper on f_read that does some string formatting for us
-    TCHAR* rres = f_gets((TCHAR*)readBuf, 30, &fil);
-    if(rres != 0) {
-        printf("Read string from 'test.txt' contents: %s\r\n", readBuf);
-    } else {
-        printf("f_gets error (%i)\r\n", fres);
-    }
-
-    //Be a tidy kiwi - don't forget to close your file!
-    f_close(&fil);
-
-    //Now let's try and write a file "write.txt"
     // fres = f_open(&fil, "co2_data.txt", FA_WRITE | FA_OPEN_ALWAYS | FA_CREATE_ALWAYS);
     fres = f_open(&fil, "co2_data.txt", FA_WRITE | FA_OPEN_APPEND);
     if(fres == FR_OK) {
@@ -214,68 +156,31 @@ int main(void)
     } else {
         printf("f_open error (%i)\r\n", fres);
     }
-
-    //Copy in a string
-
-    
-    
-    /* ------------------------------------------------- */
-
-    printf("ahoj %d :-D \n\r", 1);
-        
-    /* CO2 readout loop  */ 
-    sys_delay(1000);
-    uint64_t serial_number = co2_sensor.getSensorSerialNumber();
-    printf("Serial number: %llu\n\r", serial_number);
-    sys_delay(10);
-    auto type = co2_sensor.getSensorVariant();
-    if (type == SCD4X::SensorVariant::SCD40)
-    {
-        printf("Sensor variant: SCD40\n\r");
+          
+    int len = snprintf((char*)readBuf, sizeof(readBuf), "CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
+            measurement.co2_ppm, measurement.temperature, measurement.humidity);
+    len -= 1;
+    UINT bytesWrote;
+    fres = f_write(&fil, readBuf, len, &bytesWrote);
+    if(fres == FR_OK) {
+        printf("Wrote %i bytes to 'co2_data.txt'!\r\n", bytesWrote);
+    } else {
+        printf("f_write error (%i)\r\n", fres);
     }
-    else if (type == SCD4X::SensorVariant::SCD41)
-    {
-        printf("Sensor variant: SCD41\n\r");
-    }   
-    
-    gpio_reset(GPIOA, GPIO_PIN_3);
-    gpio_reset(GPIOB, GPIO_PIN_0);    
-
-    co2_sensor.startPeriodicMeasurement();
-    
-    
-    
-    for (size_t i = 0; i < 200; i++)
-    {
-        while (!co2_sensor.getDataReadyStatus())
-        {
-            sys_delay(1000);
-        } 
-        auto measurement = co2_sensor.getMeasurement();
-        printf("CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
-                measurement.co2_ppm, measurement.temperature, measurement.humidity);
-       
-        
-        int len = snprintf((char*)readBuf, sizeof(readBuf), "CO2: %.0f ppm, T: %.2f C, RH: %.2f %%\n\r",
-                measurement.co2_ppm, measurement.temperature, measurement.humidity);
-        len -= 1;
-        UINT bytesWrote;
-        fres = f_write(&fil, readBuf, len, &bytesWrote);
-        if(fres == FR_OK) {
-            printf("Wrote %i bytes to 'co2_data.txt'!\r\n", bytesWrote);
-        } else {
-            printf("f_write error (%i)\r\n", fres);
-        }
-        
-        gpio_toogle(GPIOA, GPIO_PIN_3);
-    }
-     
-    gpio_reset(GPIOA, GPIO_PIN_3);
-    gpio_set(GPIOB, GPIO_PIN_0);
+         
     f_close(&fil);
     f_mount(NULL, "", -1);
-    gpio_set(GPIOA, GPIO_PIN_3);
+    /* ----------------------------- */
 
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        gpio_toogle(GPIOB, GPIO_PIN_0); 
+        gpio_toogle(GPIOA, GPIO_PIN_3); 
+        sys_delay(100);
+    }
+
+    gpio_reset(GPIOA, GPIO_PIN_0);
     while(1);
 }
 
