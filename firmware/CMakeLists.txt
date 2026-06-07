@@ -42,6 +42,7 @@ add_executable(main
     src/rtc_rv3028.cpp  
 
     # sd card 
+    src/sd_card.cpp
     fatfs/app/fatfs.c 
     fatfs/core/diskio.c
     fatfs/core/ff.c 
