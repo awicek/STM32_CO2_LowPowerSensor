@@ -113,3 +113,17 @@ void SCD4X::singleShotMesurement()
 {
     sendCommand(MEASURE_SINGLE_SHOT);
 }
+
+
+
+void SCD4X::enterSleepMode()
+{
+    sendCommand(POWER_DOWN);
+}
+
+
+
+void SCD4X::wakeUp()
+{
+    sendCommand(WAKE_UP);
+}

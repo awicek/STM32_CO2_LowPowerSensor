@@ -18,6 +18,7 @@
 #include <stm32g474xx.h>
 #include <stm32g4xx_hal_gpio.h>
 #include <stm32g4xx_hal_pwr_ex.h>
+#include <stm32g4xx_hal_rcc.h>
 #include <string.h>
 
 #include <stm32g4xx_hal_flash_ex.h>
@@ -61,16 +62,7 @@ int main(void)
 
     /* ---------------------- */
 
-    // MX_USART2_UART_Init();
-    // sys_delay(2000);
-    // HAL_UART_MspDeInit(&huart2); 
-    sys_delay(2000);
-    HAL_PWREx_EnableLowPowerRunMode();
-    sys_delay(2000);
-    HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFE); 
-     
-
-
+    
     /* Pheripheral Init  */ 
     gpio_leds.pins = GPIO_PIN_3;
     gpio_init(GPIOA, &gpio_leds);
@@ -82,7 +74,7 @@ int main(void)
         .pins = GPIO_pin_8 | GPIO_PIN_9,
         .mode = GPIO_mode_alternate,
         .output_type = GPIO_otype_opendrain,
-        .pull = GPIO_pupd_no,
+        .pull = GPIO_pupd_pullup,
         .speed = GPIO_speed_veryhigh,
         .alternate = GPIO_af_4};
     gpio_init(GPIOA, &gpio_settings);
@@ -101,8 +93,26 @@ int main(void)
     SCD4X co2_sensor(I2C2);
     printf("Serial number: %llu\n\r", co2_sensor.getSensorSerialNumber());
     std::array<SCD4X::Measurement, 1> measurements;
-    co2_sensor.startPeriodicMeasurement();  
+    sys_delay(2000);
+    for(int i = 0; i < 5; ++i)
+    {
+        co2_sensor.enterSleepMode();
+        sys_delay(500);
+        co2_sensor.wakeUp();
+        sys_delay(500);
+    }
+    
+    co2_sensor.enterSleepMode();
+    
+    __HAL_RCC_PWR_CLK_ENABLE();
+    sys_delay(2000);
+    
+    gpio_reset(GPIOA, GPIO_PIN_0);
+    
+    HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI); 
+    
 
+    co2_sensor.singleShotMesurement();
     for (size_t i = 0; i < measurements.size(); i++)
     {
         while (!co2_sensor.getDataReadyStatus())

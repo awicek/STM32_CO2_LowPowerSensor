@@ -41,6 +41,18 @@ public:
     uint64_t getSensorSerialNumber();
 
     /**
+    *  @brief Enter sleep mode.
+    *  @note Use to save power consuption. Can not take measurements in this mode.
+    *  Use @ref wakeUp() to wake up from sleep mode.
+    */
+    void enterSleepMode();
+
+    /**
+     *  @brief Wakes up from sleep mode.
+     */
+    void wakeUp();
+
+    /**
     *  @brief Reads the sensor variant (SCD40 or SCD41).
     *  Blocking function.
     *  @return SensorVariant.
@@ -121,6 +133,7 @@ private:
     constexpr static uint16_t MEASURE_SINGLE_SHOT             = 0x9D21;
     constexpr static uint16_t MEASURE_SINGLE_SHOT_RHT_ONLY    = 0x9621;
     constexpr static uint16_t POWER_DOWN                      = 0xE036;
+    constexpr static uint16_t WAKE_UP                         = 0xF636;
     constexpr static uint16_t SET_ASC_INITIAL_PERIOD          = 0x4524;
     constexpr static uint16_t GET_ASC_INITIAL_PERIOD          = 0x4023;
     constexpr static uint16_t SET_ASC_STANDARD_PERIOD         = 0x4E24;
