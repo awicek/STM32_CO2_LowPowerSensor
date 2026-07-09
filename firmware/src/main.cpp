@@ -7,6 +7,7 @@
 #include "sys_tick.h"
 #include "g4_iic.h"
 #include "g4_gpio.h"
+#include "g4_rtc.h"
 #include "sd_card.hpp"
 #include "stm32g4xx_hal.h"
 
@@ -28,7 +29,7 @@
 #include <stm32g4xx_hal_uart.h>
 #include <stm32g4xx_ll_gpio.h>
 #include <stm32g4xx_ll_i2c.h>
-
+#include <stm32g4xx_ll_rtc.h>
 
 #include <stm32g4xx_hal_flash_ex.h>
 #include "fatfs.h"
@@ -50,7 +51,7 @@ int main(void)
 
     /* MCU POWER ON PIN PA0 */  
     gpio_init_t gpio_leds = {
-            .pins = GPIO_PIN_0,
+            .pins = GPIO_PIN_0 | GPIO_PIN_1,
             .mode = GPIO_mode_output,
             .output_type = GPIO_otype_pushpull,
             .pull = GPIO_pupd_no,
@@ -61,6 +62,10 @@ int main(void)
     gpio_set(GPIOA, GPIO_PIN_0);
 
     /* ---------------------- */
+
+    /* RTC Init //{ */
+    // rtc_init();
+    //}
 
     
     /* Pheripheral Init  */ 
@@ -105,11 +110,22 @@ int main(void)
     co2_sensor.enterSleepMode();
     
     __HAL_RCC_PWR_CLK_ENABLE();
-    sys_delay(2000);
+    for (int i = 0; i < 5; ++i)
+    {
+
+        HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+        // gpio_toogle(GPIOA, GPIO_PIN_1);
+        sys_delay(2000);
+        HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2);
+        sys_delay(2000);
+    }        
+    gpio_reset(GPIOA, GPIO_PIN_1);
     
+
+    
+    HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI);
+
     gpio_reset(GPIOA, GPIO_PIN_0);
-    
-    HAL_PWREx_EnterSTOP1Mode(PWR_STOPENTRY_WFI); 
     
 
     co2_sensor.singleShotMesurement();
@@ -225,6 +241,9 @@ int main(void)
 //     Error_Handler();
 //   }
 // }
+
+/* System Clock Config //{ */
+
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -260,6 +279,8 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+//}
 
 void Error_Handler(void)
 {
