@@ -33,7 +33,9 @@ extern "C" int _write(int file, char *ptr, int len)
     return len;
 };
 
-
+/**
+ *  @brief Shows how to use the FatFs API to read and write files on an SD card.
+ */
 int main(void)
 { 
     HAL_Init();
