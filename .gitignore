@@ -1,5 +1,5 @@
-documets/
-fw_mx_gen/
+fw_gen_nucleo/
+HW/
 
 # Prerequisites
 *.d
